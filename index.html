@@ -30,6 +30,10 @@
     --bad:#B3282D;
     --bad-bg:#F9E4E4;
     --radius:14px;
+    --streak:#FF6B35;
+    --streak-bg:#FFF3E0;
+    --power:#9C27B0;
+    --power-bg:#F3E5F5;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html,body{ height:100%; }
@@ -481,6 +485,214 @@
     .btn-wide{ min-width:0; }
     .modal-actions .btn{ width:100%; }
   }
+
+  /* ══════════ PARTICULAS Y EFECTOS ══════════ */
+  .particle{
+    position:fixed; pointer-events:none; z-index:100;
+    font-size:1.4rem; line-height:1;
+    animation:particle-fly .8s cubic-bezier(.25,.46,.45,.94) forwards;
+  }
+  @keyframes particle-fly{
+    0%{ transform:translate(0,0) scale(1) rotate(0deg); opacity:1; }
+    100%{ transform:translate(var(--tx), var(--ty)) scale(0.3) rotate(var(--rot)); opacity:0; }
+  }
+  .coin-fly{
+    position:fixed; pointer-events:none; z-index:100;
+    width:28px; height:28px; border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, #FFF6C4, var(--coin) 48%, var(--coin-dark) 100%);
+    border:2px solid #A9780A;
+    box-shadow:0 0 0 2px rgba(255,211,78,.28);
+    animation:coin-fly .6s cubic-bezier(.25,.46,.45,.94) forwards;
+  }
+  @keyframes coin-fly{
+    0%{ transform:translate(0,0) scale(1) rotateY(0deg); opacity:1; }
+    50%{ transform:translate(var(--tx), var(--ty)) scale(1.2) rotateY(180deg); opacity:1; }
+    100%{ transform:translate(var(--tx), var(--ty)) scale(0) rotateY(360deg); opacity:0; }
+  }
+  .screen-flash{
+    position:fixed; inset:0; z-index:90; pointer-events:none;
+    background:var(--flash-color); opacity:0;
+    animation:screen-flash .15s ease-out forwards;
+  }
+  @keyframes screen-flash{
+    0%{ opacity:0; }
+    30%{ opacity:0.25; }
+    100%{ opacity:0; }
+  }
+  .streak-badge{
+    position:fixed; top:80px; left:50%; transform:translateX(-50%) scale(0);
+    z-index:80; pointer-events:none;
+    background:linear-gradient(135deg, var(--streak), #FF9F1C);
+    color:#fff; padding:8px 20px; border-radius:30px;
+    font-weight:800; font-size:1rem; letter-spacing:.05em;
+    box-shadow:0 6px 20px rgba(255,107,53,.5);
+    animation:streak-pop .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes streak-pop{
+    0%{ transform:translateX(-50%) scale(0); opacity:0; }
+    50%{ transform:translateX(-50%) scale(1.15); opacity:1; }
+    100%{ transform:translateX(-50%) scale(1); opacity:1; }
+  }
+  .streak-badge.fade{ animation:streak-fade .4s ease-in forwards; }
+  @keyframes streak-fade{
+    0%{ transform:translateX(-50%) scale(1); opacity:1; }
+    100%{ transform:translateX(-50%) scale(0.8); opacity:0; }
+  }
+  .milestone-toast{
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(100px);
+    z-index:85; pointer-events:none;
+    background:linear-gradient(135deg, var(--gold), #FFD700);
+    color:#3A2A00; padding:14px 28px; border-radius:16px;
+    font-weight:800; font-size:1.1rem; letter-spacing:.03em;
+    box-shadow:0 8px 30px rgba(252,224,68,.5);
+    border:3px solid #B48F06;
+    animation:milestone-in .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes milestone-in{
+    0%{ transform:translateX(-50%) translateY(100px) scale(0.8); opacity:0; }
+    60%{ transform:translateX(-50%) translateY(-10px) scale(1.05); opacity:1; }
+    100%{ transform:translateX(-50%) translateY(0) scale(1); opacity:1; }
+  }
+  .milestone-toast.fade{ animation:milestone-out .4s ease-in forwards; }
+  @keyframes milestone-out{
+    0%{ transform:translateX(-50%) translateY(0) scale(1); opacity:1; }
+    100%{ transform:translateX(-50%) translateY(-100px) scale(0.8); opacity:0; }
+  }
+  .question-enter{
+    animation:question-in .4s cubic-bezier(.25,.46,.45,.94) forwards;
+  }
+  @keyframes question-in{
+    0%{ transform:translateY(20px); opacity:0; }
+    100%{ transform:translateY(0); opacity:1; }
+  }
+  .question-exit{
+    animation:question-out .25s ease-in forwards;
+  }
+  @keyframes question-out{
+    0%{ transform:translateX(0); opacity:1; }
+    100%{ transform:translateX(-30px); opacity:0; }
+  }
+  .world-transition{
+    position:fixed; inset:0; z-index:200; pointer-events:none;
+    background:linear-gradient(180deg, var(--sky-night) 0%, var(--sky-deep) 100%);
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; opacity:0;
+  }
+  .world-transition.active{ opacity:1; }
+  .warp-pipe{
+    width:80px; height:120px;
+    background:linear-gradient(90deg, var(--pipe-dark) 0%, var(--pipe) 32%, #7BE889 52%, var(--pipe) 70%, var(--pipe-dark) 100%);
+    border:4px solid var(--pipe-dark); border-radius:8px 8px 0 0;
+    position:relative; overflow:hidden;
+  }
+  .warp-pipe::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:20px;
+    background:linear-gradient(180deg, #6BE07A, var(--pipe));
+    border-radius:4px 4px 0 0; border-bottom:4px solid var(--pipe-dark);
+  }
+  .mario-warp{
+    position:absolute; bottom:-60px; left:50%; transform:translateX(-50%);
+    font-size:3rem; animation:warp-down .8s cubic-bezier(.55,.06,.68,.19) forwards;
+  }
+  @keyframes warp-down{
+    0%{ bottom:-60px; opacity:1; }
+    100%{ bottom:120px; opacity:0; }
+  }
+  .world-transition-text{
+    margin-top:20px; color:var(--gold); font-size:1.5rem; font-weight:800;
+    text-shadow:0 3px 0 #7A5A00, 0 5px 10px rgba(0,0,0,.6);
+    animation:text-pop .6s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes text-pop{
+    0%{ transform:scale(0.5); opacity:0; }
+    60%{ transform:scale(1.1); opacity:1; }
+    100%{ transform:scale(1); opacity:1; }
+  }
+  .victory-fireworks{
+    position:fixed; inset:0; z-index:70; pointer-events:none; overflow:hidden;
+  }
+  .firework{
+    position:absolute; width:6px; height:6px; border-radius:50%;
+    animation:firework-burst 1.2s ease-out forwards;
+  }
+  @keyframes firework-burst{
+    0%{ transform:translate(0,0) scale(1); opacity:1; }
+    100%{ transform:translate(var(--fx), var(--fy)) scale(0); opacity:0; }
+  }
+  .powerup-icon{
+    display:inline-block; width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg, var(--power), #E040FB);
+    color:#fff; font-size:1rem; line-height:32px; text-align:center;
+    margin-left:8px; vertical-align:middle;
+    box-shadow:0 2px 8px rgba(156,39,176,.4);
+    animation:powerup-pulse 2s ease-in-out infinite;
+  }
+  @keyframes powerup-pulse{
+    0%,100%{ box-shadow:0 2px 8px rgba(156,39,176,.4); transform:scale(1); }
+    50%{ box-shadow:0 4px 16px rgba(156,39,176,.7); transform:scale(1.1); }
+  }
+  .hud-streak{
+    display:flex; align-items:center; gap:6px;
+    background:var(--streak-bg); border:2px solid var(--streak);
+    color:var(--streak); padding:4px 10px; border-radius:9px;
+  }
+  .hud-streak .streak-label{ font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; }
+  .hud-streak .streak-val{ font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:800; font-size:1rem; }
+  .option.hint{ animation:hint-pulse 1.5s ease-in-out infinite; }
+  @keyframes hint-pulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(47,99,200,.4); }
+    50%{ box-shadow:0 0 0 8px rgba(47,99,200,0); }
+  }
+  .loading-overlay{
+    position:fixed; inset:0; z-index:150; pointer-events:none;
+    background:rgba(8,16,38,.8); display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:16px; opacity:0; visibility:hidden;
+    transition:opacity .2s, visibility .2s;
+  }
+  .loading-overlay.show{ opacity:1; visibility:visible; }
+  .loading-spinner{
+    width:48px; height:48px; border:4px solid rgba(252,224,68,.3);
+    border-top-color:var(--gold); border-radius:50%;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .loading-text{ color:var(--gold); font-weight:700; font-size:1.1rem; }
+  .easter-egg{
+    position:fixed; bottom:20px; right:20px; z-index:60;
+    background:rgba(0,0,0,.7); color:#fff; padding:8px 14px;
+    border-radius:20px; font-size:.8rem; font-weight:600;
+    transform:translateY(100px); opacity:0;
+    transition:transform .4s, opacity .4s;
+  }
+  .easter-egg.show{ transform:translateY(0); opacity:1; }
+  .key-hint{
+    display:inline-block; background:#16305C; color:var(--gold);
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:.7rem; padding:1px 6px; border-radius:4px; margin-left:6px;
+    vertical-align:middle;
+  }
+  .option:focus-visible .key-hint{ outline:2px solid var(--gold); outline-offset:1px; }
+  .streak-milestone{
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+    z-index:90; pointer-events:none; text-align:center;
+  }
+  .streak-milestone.active{
+    animation:milestone-big .8s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes milestone-big{
+    0%{ transform:translate(-50%,-50%) scale(0); opacity:0; }
+    40%{ transform:translate(-50%,-50%) scale(1.2); opacity:1; }
+    60%{ transform:translate(-50%,-50%) scale(0.95); opacity:1; }
+    100%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+  }
+  .streak-milestone.fade{ animation:milestone-big-fade .5s ease-in forwards; }
+  @keyframes milestone-big-fade{
+    0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+    100%{ transform:translate(-50%,-50%) scale(1.3); opacity:0; }
+  }
+  .streak-milestone .emoji{ font-size:5rem; line-height:1; display:block; margin-bottom:8px; }
+  .streak-milestone .text{ color:var(--gold); font-size:2rem; font-weight:800; text-shadow:0 3px 0 #7A5A00, 0 5px 10px rgba(0,0,0,.6); }
+  .streak-milestone .sub{ color:#FFEFA8; font-size:1.1rem; margin-top:4px; }
 </style>
 </head>
 <body>
@@ -490,6 +702,7 @@
   <div class="hud-inner">
     <div class="hud-item"><span class="hud-ico">🪙</span><span class="hud-val" id="hudCoins">0</span><span class="hud-lbl">Monedas</span></div>
     <div class="hud-item"><span class="hud-ico">🏆</span><span class="hud-val" id="hudScore">0</span><span class="hud-lbl">Aciertos</span></div>
+    <div class="hud-streak" id="hudStreak"><span class="streak-label">Racha</span><span class="streak-val" id="hudStreakVal">0</span></div>
     <div class="hud-item"><span class="hud-ico">🌎</span><span class="hud-val" id="hudWorld">1-1</span><span class="hud-lbl">Mundo</span></div>
 <div class="hud-map" id="hudMap"></div>
   </div>
@@ -716,6 +929,36 @@
 
 <div id="toast"></div>
 
+<!-- Contenedor de partículas y efectos visuales -->
+<div id="particleContainer" aria-hidden="true"></div>
+
+<!-- Overlay de carga -->
+<div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Cargando...</div>
+</div>
+
+<!-- Transición entre mundos -->
+<div class="world-transition" id="worldTransition" aria-hidden="true">
+  <div class="warp-pipe">
+    <div class="mario-warp">🏃‍♂️</div>
+  </div>
+  <div class="world-transition-text" id="worldTransitionText">Mundo 1-2</div>
+</div>
+
+<!-- Fuegos artificiales para victoria -->
+<div class="victory-fireworks" id="victoryFireworks" aria-hidden="true"></div>
+
+<!-- Easter egg toast -->
+<div class="easter-egg" id="easterEgg" aria-hidden="true">¡Código Konami activado! 🎮</div>
+
+<!-- Hito de racha -->
+<div class="streak-milestone" id="streakMilestone" aria-hidden="true">
+  <span class="emoji">🔥</span>
+  <span class="text">RACHA DE 5</span>
+  <span class="sub">¡Imparable!</span>
+</div>
+
 <!-- Acceso discreto del docente -->
 <button class="teacher-trigger" id="teacherTrigger" title="Acceso del docente" aria-label="Acceso del docente">●</button>
 
@@ -832,6 +1075,20 @@ const START_LIVES = 3;
 const MAX_WORLD_RETRIES = 3;
 const DEFAULT_POINTS = 0.4; /* 25 preguntas, nota sobre 10 */
 
+/* Nuevas constantes para mejoras de UX */
+const STREAK_MILESTONES = [3, 5, 8, 10, 15, 20, 25];
+const MILESTONE_MESSAGES = {
+  3: { emoji: '⭐', text: '¡RACHA DE 3!', sub: 'Bien empezado' },
+  5: { emoji: '🔥', text: '¡RACHA DE 5!', sub: '¡Imparable!' },
+  8: { emoji: '⚡', text: '¡RACHA DE 8!', sub: 'En llamas' },
+  10: { emoji: '💎', text: '¡RACHA DE 10!', sub: 'Nivel experto' },
+  15: { emoji: '🌟', text: '¡RACHA DE 15!', sub: '¡Leyenda viva!' },
+  20: { emoji: '👑', text: '¡RACHA DE 20!', sub: 'Reino Champiñón' },
+  25: { emoji: '🏆', text: '¡PERFECTO!', sub: '25/25 - Maestro' }
+};
+const KONAMI_CODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+const HINT_COST = 2; /* monedas para usar pista */
+
 /* ─────────── NORMALIZACIÓN DEL BANCO ─────────── */
 function normalizeBank(raw){
   if(!raw) return null;
@@ -942,6 +1199,140 @@ function showToast(msg, ms){
   t.classList.add('show');
   setTimeout(function(){ t.classList.remove('show'); }, ms || 3200);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   4b. EFECTOS VISUALES (partículas, transiciones, hitos)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function spawnParticles(x, y, emojis, count){
+  const container = $('particleContainer');
+  if(!container) return;
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    const angle = (Math.random()*360)*Math.PI/180;
+    const dist = 60 + Math.random()*80;
+    const tx = Math.cos(angle)*dist;
+    const ty = Math.sin(angle)*dist - 40;
+    const rot = (Math.random()-0.5)*720;
+    p.style.left = x+'px';
+    p.style.top = y+'px';
+    p.style.setProperty('--tx', tx+'px');
+    p.style.setProperty('--ty', ty+'px');
+    p.style.setProperty('--rot', rot+'deg');
+    container.appendChild(p);
+    setTimeout(function(){ p.remove(); }, 800);
+  }
+}
+function spawnCoinFly(startX, startY, endX, endY){
+  const container = $('particleContainer');
+  if(!container) return;
+  const c = document.createElement('div');
+  c.className = 'coin-fly';
+  c.style.left = startX+'px';
+  c.style.top = startY+'px';
+  c.style.setProperty('--tx', (endX-startX)+'px');
+  c.style.setProperty('--ty', (endY-startY)+'px');
+  container.appendChild(c);
+  setTimeout(function(){ c.remove(); }, 600);
+}
+function screenFlash(color){
+  const overlay = document.createElement('div');
+  overlay.className = 'screen-flash';
+  overlay.style.setProperty('--flash-color', color);
+  document.body.appendChild(overlay);
+  setTimeout(function(){ overlay.remove(); }, 150);
+}
+function showStreakBadge(streak){
+  const existing = document.querySelector('.streak-badge');
+  if(existing) existing.remove();
+  const badge = document.createElement('div');
+  badge.className = 'streak-badge';
+  badge.textContent = '🔥 Racha: '+streak;
+  document.body.appendChild(badge);
+  setTimeout(function(){ badge.classList.add('fade'); setTimeout(function(){ badge.remove(); }, 400); }, 2000);
+}
+function showMilestoneToast(milestone){
+  const msg = MILESTONE_MESSAGES[milestone];
+  if(!msg) return;
+  const toast = document.createElement('div');
+  toast.className = 'milestone-toast';
+  toast.innerHTML = msg.emoji+' '+msg.text+' <span style="font-weight:500;font-size:.9em;">('+msg.sub+')</span>';
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.classList.add('fade'); setTimeout(function(){ toast.remove(); }, 400); }, 3000);
+}
+function showBigMilestone(milestone){
+  const msg = MILESTONE_MESSAGES[milestone];
+  if(!msg) return;
+  const el = $('streakMilestone');
+  if(!el) return;
+  el.querySelector('.emoji').textContent = msg.emoji;
+  el.querySelector('.text').textContent = msg.text;
+  el.querySelector('.sub').textContent = msg.sub;
+  el.classList.remove('fade');
+  el.classList.add('active');
+  setTimeout(function(){ el.classList.remove('active'); el.classList.add('fade'); }, 2500);
+}
+function launchFireworks(){
+  const container = $('victoryFireworks');
+  if(!container) return;
+  container.innerHTML = '';
+  const colors = ['#FFD34E','#FF6B35','#9C27B0','#37B34A','#E8A33D','#C0392B','#5C94FC'];
+  for(let i=0;i<30;i++){
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    fw.style.left = (10+Math.random()*80)+'%';
+    fw.style.top = (20+Math.random()*60)+'%';
+    fw.style.background = colors[Math.floor(Math.random()*colors.length)];
+    fw.style.setProperty('--fx', (Math.random()-0.5)*400+'px');
+    fw.style.setProperty('--fy', (Math.random()-0.5)*300+'px');
+    fw.style.animationDelay = (Math.random()*0.5)+'s';
+    container.appendChild(fw);
+  }
+  setTimeout(function(){ container.innerHTML = ''; }, 3000);
+}
+function showWorldTransition(worldIndex, callback){
+  const overlay = $('worldTransition');
+  const text = $('worldTransitionText');
+  if(!overlay || !text) { if(callback) callback(); return; }
+  const world = WORLDS[worldIndex];
+  text.textContent = world ? worldCode(world, worldIndex) : 'Mundo '+(worldIndex+1);
+  overlay.classList.add('active');
+  setTimeout(function(){
+    overlay.classList.remove('active');
+    if(callback) callback();
+  }, 1200);
+}
+function showLoading(text){
+  const overlay = $('loadingOverlay');
+  const txt = $('loadingText');
+  if(overlay && txt){ txt.textContent = text; overlay.classList.add('show'); }
+}
+function hideLoading(){
+  const overlay = $('loadingOverlay');
+  if(overlay) overlay.classList.remove('show');
+}
+function checkStreakMilestones(){
+  const streak = STATE.correct;
+  if(STREAK_MILESTONES.includes(streak)){
+    showBigMilestone(streak);
+    showMilestoneToast(streak);
+  }
+}
+function checkKonami(e){
+  if(!window.konamiBuffer) window.konamiBuffer = [];
+  window.konamiBuffer.push(e.key);
+  if(window.konamiBuffer.length > KONAMI_CODE.length) window.konamiBuffer.shift();
+  if(window.konamiBuffer.join(',') === KONAMI_CODE.join(',')){
+    const egg = $('easterEgg');
+    if(egg){ egg.classList.add('show'); setTimeout(function(){ egg.classList.remove('show'); }, 4000); }
+    STATE.coins += 10;
+    renderHud();
+    showToast('¡Código Konami! +10 monedas 🎮', 4000);
+    window.konamiBuffer = [];
+  }
+}
+document.addEventListener('keydown', checkKonami);
 
 /* ══════════════════════════════════════════════════════════════════════════
    5. ESTADO
@@ -1058,6 +1449,7 @@ function worldEnemy(w, idx){
 function renderHud(){
   $('hudCoins').textContent = STATE.coins;
   $('hudScore').textContent = STATE.correct + '/' + TOTAL_QUESTIONS;
+  $('hudStreakVal').textContent = STATE.correct;
   const w = WORLDS[STATE.worldIndex];
   $('hudWorld').textContent = w ? worldCode(w, STATE.worldIndex) : '-';
   const map = $('hudMap');
@@ -1387,11 +1779,31 @@ function renderQuestion(){
   sh.options.forEach(function(opt,i){
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'option';
+    btn.className = 'option question-enter';
+    btn.style.animationDelay = (i*0.08)+'s';
     btn.innerHTML = '<span class="letter">'+LETTERS[i]+'</span>'+escapeHtml(opt);
     btn.addEventListener('click', function(){ handleAnswer(i); });
     wrap.appendChild(btn);
   });
+
+  /* Botón de pista (cuesta monedas) */
+  if(STATE.coins >= HINT_COST && q.explanation){
+    const hintBtn = document.createElement('button');
+    hintBtn.type = 'button';
+    hintBtn.className = 'btn btn-ghost btn-sm';
+    hintBtn.style.marginTop = '10px';
+    hintBtn.innerHTML = '💡 Pista ('+HINT_COST+' monedas) <span class="key-hint">H</span>';
+    hintBtn.addEventListener('click', function(){
+      if(STATE.coins < HINT_COST){ showToast('No tienes suficientes monedas para una pista.'); return; }
+      STATE.coins -= HINT_COST;
+      const hintText = q.explanation.split('\n')[0];
+      showToast('💡 Pista: '+hintText, 5000);
+      renderHud();
+      hintBtn.disabled = true;
+      hintBtn.style.opacity = '0.5';
+    });
+    wrap.appendChild(hintBtn);
+  }
 
   const fb = $('battleFeedback');
   fb.className = 'feedback';
@@ -1453,11 +1865,26 @@ function handleAnswer(selectedIdx){
     const foeEl = $('stageFoe');
     foeEl.classList.add('hit');
     setTimeout(function(){ foeEl.classList.remove('hit'); }, 400);
+
+    /* Efectos visuales: partículas, flash, moneda volando, racha */
+    const foeRect = foeEl.getBoundingClientRect();
+    spawnParticles(foeRect.left + foeRect.width/2, foeRect.top + foeRect.height/2, ['⭐','✨','💫','🌟','⚡'], 12);
+    screenFlash('rgba(30,123,79,0.3)');
+    const hudCoins = $('hudCoins');
+    if(hudCoins){
+      const coinRect = hudCoins.getBoundingClientRect();
+      spawnCoinFly(foeRect.left + foeRect.width/2, foeRect.top + foeRect.height/2, coinRect.left + coinRect.width/2, coinRect.top + coinRect.height/2);
+    }
+    checkStreakMilestones();
+    showStreakBadge(STATE.correct);
   } else {
     STATE.lives = Math.max(0, STATE.lives - 1);
     fb.className = 'feedback show bad';
     fb.innerHTML = '<span class="fb-title">Incorrecto. '+STATE.lives+'.</span>'+
       '<div class="exp-block"><span class="exp-head">Explicación</span>'+renderExplanation(q.explanation)+'</div>';
+    const foeRect = $('stageFoe').getBoundingClientRect();
+    spawnParticles(foeRect.left + foeRect.width/2, foeRect.top + foeRect.height/2, ['💥','💨','😵','💫'], 8);
+    screenFlash('rgba(179,40,45,0.25)');
   }
   renderHearts($('foeHearts'), currentFoe().hearts, foeHeartsLeft());
   renderHud();
@@ -1523,6 +1950,7 @@ function worldCleared(){
   $('wcLives').textContent = STATE.lives;
   renderHud();
   showScreen('screen-world-clear');
+  showMilestoneToast(STATE.clearedWorlds.length * 5); // 5, 10, 15, 20, 25
 }
 
 function bossSurvived(){
@@ -1562,11 +1990,14 @@ function retryWorld(){
 
 function nextWorld(){
   if(STATE.worldIndex < WORLDS.length - 1){
-    STATE.worldIndex++;
-    STATE.retriesLeft = MAX_WORLD_RETRIES;
-    prepareWorld();
-    showScreen('screen-world');
-    renderWorldIntro();
+    const nextIndex = STATE.worldIndex + 1;
+    showWorldTransition(nextIndex, function(){
+      STATE.worldIndex = nextIndex;
+      STATE.retriesLeft = MAX_WORLD_RETRIES;
+      prepareWorld();
+      showScreen('screen-world');
+      renderWorldIntro();
+    });
   } else {
     endGame(true, '');
   }
@@ -1593,6 +2024,7 @@ function endGame(completedAll, reason){
   $('btnToggleReview').textContent = 'Ver revisión de respuestas';
   buildReview();
   showScreen('screen-victory');
+  if(completedAll){ launchFireworks(); }
   saveProgress();
   saveResult(nota);
 }
