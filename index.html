@@ -287,8 +287,6 @@
   .foe-box.boss .foe-emoji{ font-size:3.6rem; }
   .foe-name{ font-weight:800; color:#16305C; margin-top:4px; }
   .foe-role{ font-size:.8rem; color:#5A6B8C; text-transform:uppercase; letter-spacing:.04em; }
-  .hearts{ margin-top:6px; font-size:1.25rem; letter-spacing:2px; }
-  .hearts .off{ filter:grayscale(1); opacity:.35; }
 
   /* ══════════ ESCENA DE BATALLA ══════════ */
   .stage{
@@ -324,7 +322,6 @@
     background:rgba(0,0,0,.42); color:#FFEFA8; font-size:.78rem; font-weight:700;
     text-transform:uppercase; letter-spacing:.05em;
   }
-  .stage-foe .hearts{ color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
   @keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
   .stage-foe.hit{ animation:shake .35s ease; }
   @keyframes shake{ 0%,100%{ transform:translateX(-50%); } 25%{ transform:translateX(calc(-50% - 8px)); } 75%{ transform:translateX(calc(-50% + 8px)); } }
@@ -811,7 +808,6 @@
     <div class="stage-foe" id="stageFoe">
       <div class="foe-emoji" id="foeEmoji">🍄</div>
       <div class="foe-name" id="foeName">Goomba</div>
-      <div class="hearts" id="foeHearts"></div>
       <div class="phase-tag" id="phaseTag">Enemigo del camino</div>
     </div>
   </div>
@@ -1764,7 +1760,6 @@ function renderQuestion(){
   $('foeEmoji').textContent = foe.emoji;
   $('foeName').textContent = foe.name;
   $('phaseTag').textContent = foe.role;
-  renderHearts($('foeHearts'), foe.hearts, foeHeartsLeft());
 
   const inPhase = (STATE.phase === 'enemy' ? STATE.enemyCount : STATE.bossCount);
   $('qProgress').textContent = 'Pregunta '+(STATE.phaseIndex+1)+' de '+inPhase+' · '+worldCode(world, STATE.worldIndex)+' · '+world.name;
@@ -1772,7 +1767,13 @@ function renderQuestion(){
   $('qText').textContent = q.q;
 
   const wrap = $('options');
+  if(!wrap){ console.error('Options container not found'); return; }
   wrap.innerHTML = '';
+  if(!sh || !sh.options || !sh.options.length){
+    console.error('No shuffled options for question', idx, sh);
+    wrap.innerHTML = '<div style="color:red;padding:20px;text-align:center;">Error: No hay opciones disponibles para esta pregunta.</div>';
+    return;
+  }
   sh.options.forEach(function(opt,i){
     const btn = document.createElement('button');
     btn.type = 'button';
