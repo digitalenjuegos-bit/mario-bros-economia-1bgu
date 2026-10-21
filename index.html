@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mario Bros · Historia y Ciudadanía 1BGU</title>
+<style>
+  :root{
+    --sky:#5C94FC;
+    --sky-deep:#3A6BD8;
+    --sky-night:#1B2B63;
+    --ground:#C8712A;
+    --ground-dark:#8A4A17;
+    --ground-line:#5E3210;
+    --brick:#C0392B;
+    --brick-dark:#8E2A20;
+    --block:#E8A33D;
+    --block-dark:#A9711B;
+    --coin:#FFD34E;
+    --coin-dark:#D79B12;
+    --pipe:#37B34A;
+    --pipe-dark:#1B6E29;
+    --hud:#141A2E;
+    --hud-2:#243056;
+    --gold:#FCE044;
+    --ink:#12203C;
+    --panel:#FFFFFF;
+    --ok:#1E7B4F;
+    --ok-bg:#E3F2E9;
+    --bad:#B3282D;
+    --bad-bg:#F9E4E4;
+    --radius:14px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size:17px;
+    line-height:1.55;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--sky) 0%, #8FC3FF 58%, var(--sky-deep) 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{ line-height:1.2; }
+  .screen{ display:none; max-width:880px; margin:0 auto; padding:18px 16px 60px; }
+  .screen.active{ display:block; }
+
+  /* ══════════ HUD ══════════ */
+  #hud{
+    position:sticky; top:0; z-index:40;
+    display:none;
+    background:linear-gradient(180deg, var(--hud-2) 0%, var(--hud) 100%);
+    border-bottom:4px solid var(--gold);
+    box-shadow:0 4px 14px rgba(0,0,0,.35);
+    padding:8px 12px;
+  }
+  #hud.show{ display:block; }
+  .hud-inner{
+    max-width:880px; margin:0 auto;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .hud-item{
+    display:flex; align-items:center; gap:6px;
+    background:rgba(0,0,0,.30); border:2px solid rgba(252,224,68,.45);
+    border-radius:9px; padding:4px 10px;
+  }
+  .hud-ico{ font-size:1.15rem; line-height:1; }
+  .hud-val{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight:700; color:var(--gold); font-size:1rem;
+  }
+  .hud-lbl{ color:#CBD8F5; font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; }
+  .hud-map{ display:flex; gap:5px; margin-left:auto; flex-wrap:wrap; }
+  .pip{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:.76rem; font-weight:700; padding:4px 8px; border-radius:7px;
+    background:rgba(255,255,255,.10); color:#8FA3CC; border:2px solid rgba(255,255,255,.12);
+  }
+  .pip.done{ background:#1E7B4F; color:#DFF6E8; border-color:#2F9E63; }
+  .pip.current{ background:var(--gold); color:#3A2A00; border-color:#FFF0A8; }
+
+  /* ══════════ BANNER ══════════ */
+  .banner{
+    text-align:center; position:relative;
+    background:linear-gradient(180deg, #1B2A55 0%, #0E1730 100%);
+    border:3px solid var(--gold); border-radius:var(--radius);
+    padding:20px 16px 16px; margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(0,0,0,.4);
+    overflow:hidden;
+  }
+  .banner h1{
+    color:var(--gold);
+    font-size:2.5rem; font-weight:800; letter-spacing:.03em;
+    text-shadow:0 3px 0 #7A5A00, 0 5px 10px rgba(0,0,0,.6);
+    margin:6px 0 4px;
+  }
+  .banner .subtitle{ color:#EAF0FF; font-size:1rem; font-weight:600; }
+  .banner .unit{
+    display:inline-block; margin-top:8px; padding:5px 14px; border-radius:20px;
+    background:rgba(252,224,68,.14); border:1px solid rgba(252,224,68,.5);
+    color:#FFEFA8; font-size:.84rem;
+  }
+  .banner-coins{ display:flex; gap:10px; justify-content:center; margin-bottom:4px; }
+  .castle-svg{ width:150px; height:112px; display:block; margin:10px auto 0; }
+  .coin{
+    width:24px; height:24px; border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, #FFF6C4, var(--coin) 48%, var(--coin-dark) 100%);
+    border:2px solid #A9780A; display:inline-block;
+    box-shadow:0 0 0 2px rgba(255,211,78,.28);
+  }
+
+  /* ══════════ ESCENARIO DECORATIVO ══════════ */
+  .scene{
+    position:relative; height:170px; overflow:hidden;
+    border-radius:var(--radius); border:3px solid #2B4E9E;
+    margin-bottom:16px; background:linear-gradient(180deg, #6FA8FF 0%, #A9D0FF 100%);
+  }
+  .scene .cloud{ position:absolute; opacity:.95; }
+  .scene .cloud-1{ width:110px; left:4%; top:12px; }
+  .scene .cloud-2{ width:80px; right:8%; top:26px; }
+  .scene .cloud-3{ width:64px; left:44%; top:6px; }
+  .scene .hill{
+    position:absolute; bottom:34px; border-radius:50% 50% 0 0;
+    background:#3E9E43; border:3px solid #1F6B25;
+  }
+  .scene .hill-1{ width:150px; height:62px; left:-18px; }
+  .scene .hill-2{ width:120px; height:48px; right:14px; }
+  .scene .pipe{ position:absolute; bottom:32px; width:54px; }
+  .scene .pipe-1{ right:32%; }
+  .scene .pipe-2{ right:9%; transform:scale(.8); transform-origin:bottom; }
+  .pipe-rim{
+    display:block; height:15px; border-radius:4px 4px 2px 2px;
+    background:linear-gradient(180deg, #6BE07A, var(--pipe));
+    border:3px solid var(--pipe-dark);
+  }
+  .pipe-body{
+    display:block; width:40px; margin:0 auto; height:64px;
+    background:linear-gradient(90deg, var(--pipe-dark) 0%, var(--pipe) 32%, #7BE889 52%, var(--pipe) 70%, var(--pipe-dark) 100%);
+    border:3px solid var(--pipe-dark); border-top:none;
+  }
+  .scene .qblock{
+    position:absolute; bottom:32px; width:34px; height:34px;
+    display:grid; place-items:center; border-radius:4px;
+    background:linear-gradient(180deg, #F6BC55, var(--block));
+    border:3px solid var(--block-dark);
+    box-shadow:inset 0 0 0 3px rgba(252,224,68,.75);
+    color:#7A4A08; font-weight:800; font-size:1.1rem;
+  }
+  .scene .qblock-1{ left:22%; }
+  .scene .qblock-2{ left:31%; }
+  .scene .ground-strip{
+    position:absolute; left:0; right:0; bottom:0; height:32px;
+    background:repeating-linear-gradient(90deg, var(--ground) 0 34px, var(--ground-dark) 34px 36px);
+    border-top:4px solid var(--ground-line);
+  }
+
+  /* ══════════ TARJETAS ══════════ */
+  .card{
+    background:var(--panel); border:2px solid #C3D0E8; border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:16px; box-shadow:0 4px 14px rgba(10,25,60,.22);
+  }
+  .card h2{ font-size:1.25rem; margin-bottom:10px; color:#16305C; }
+  .card ol{ padding-left:22px; }
+  .card ol li{ margin-bottom:7px; }
+  .card ul{ padding-left:22px; }
+  .card ul li{ margin-bottom:6px; }
+  .note{
+    margin-top:12px; padding:11px 13px; background:#FFF6D8;
+    border-left:5px solid var(--block-dark); border-radius:8px;
+    font-size:.93rem; color:#5A4310;
+  }
+  label{ display:block; font-weight:700; margin-bottom:6px; color:#16305C; }
+  select{
+    width:100%; padding:13px 14px; font-size:1.02rem; font-family:inherit;
+    border:2px solid #9FB2D4; border-radius:10px; background:#fff; color:var(--ink);
+  }
+  select:focus{ outline:3px solid rgba(252,224,68,.75); border-color:#2F63C8; }
+  .error{
+    display:none; margin-top:12px; padding:12px 14px; background:var(--bad-bg);
+    border-left:5px solid var(--bad); border-radius:8px; color:#7A171C; font-size:.96rem;
+  }
+  .error.show{ display:block; }
+  .error.success{ background:var(--ok-bg); border-left-color:var(--ok); color:#14532D; }
+
+  /* ══════════ BOTONES ══════════ */
+  .btn{
+    display:inline-block; border:none; cursor:pointer; font-family:inherit;
+    font-size:1.06rem; font-weight:800; padding:14px 26px; border-radius:10px;
+    background:#2F63C8; color:#fff; box-shadow:0 4px 0 #1B3F86;
+    transition:transform .08s, box-shadow .08s, filter .15s;
+  }
+  .btn:hover:not(:disabled){ filter:brightness(1.08); }
+  .btn:active:not(:disabled){ transform:translateY(3px); box-shadow:0 1px 0 #1B3F86; }
+  .btn:focus-visible{ outline:3px solid var(--gold); outline-offset:3px; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; box-shadow:0 4px 0 rgba(0,0,0,.25); }
+  .btn-gold{ background:var(--gold); color:#3A2A00; box-shadow:0 4px 0 #B48F06; }
+  .btn-gold:active:not(:disabled){ box-shadow:0 1px 0 #B48F06; }
+  .btn-green{ background:#2E9E50; box-shadow:0 4px 0 #1B6E38; }
+  .btn-green:active:not(:disabled){ box-shadow:0 1px 0 #1B6E38; }
+  .btn-danger{ background:var(--bad); box-shadow:0 4px 0 #7A171C; }
+  .btn-danger:active:not(:disabled){ box-shadow:0 1px 0 #7A171C; }
+  .btn-ghost{ background:#fff; color:#16305C; border:2px solid #2F63C8; box-shadow:0 4px 0 #C3D0E8; }
+  .btn-ghost:active:not(:disabled){ box-shadow:0 1px 0 #C3D0E8; }
+  .btn-sm{ padding:9px 14px; font-size:.9rem; border-radius:8px; }
+  .btn-block{ display:block; width:100%; margin-top:6px; }
+  .btn-wide{ min-width:220px; }
+
+  /* ══════════ MUNDO ══════════ */
+  .world-card{
+    background:var(--panel); border:3px solid #C3D0E8; border-radius:var(--radius);
+    padding:20px 18px; text-align:center; box-shadow:0 6px 18px rgba(10,25,60,.25);
+  }
+  .world-badge{
+    display:inline-block; background:#16305C; color:var(--gold);
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight:800; font-size:1rem; padding:6px 16px; border-radius:20px; letter-spacing:.06em;
+  }
+  .world-card h2{ font-size:1.6rem; margin:10px 0 6px; color:#16305C; }
+  .world-sub{ color:#4A5C7C; font-size:1rem; margin-bottom:16px; }
+  .world-foes{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+  .foe-box{
+    border:2px solid #C3D0E8; border-radius:12px; padding:12px 8px; background:#F7FAFF;
+  }
+  .foe-box.boss{ border-color:#E0A200; background:#FFF8E4; }
+  .foe-emoji{ font-size:3rem; line-height:1.15; }
+  .foe-box.boss .foe-emoji{ font-size:3.6rem; }
+  .foe-name{ font-weight:800; color:#16305C; margin-top:4px; }
+  .foe-role{ font-size:.8rem; color:#5A6B8C; text-transform:uppercase; letter-spacing:.04em; }
+  .hearts{ margin-top:6px; font-size:1.25rem; letter-spacing:2px; }
+  .hearts .off{ filter:grayscale(1); opacity:.35; }
+
+  /* ══════════ ESCENA DE BATALLA ══════════ */
+  .stage{
+    position:relative; overflow:hidden; border-radius:var(--radius);
+    border:3px solid #2B4E9E; margin-bottom:14px; height:190px;
+    background:linear-gradient(180deg, #6FA8FF 0%, #A9D0FF 100%);
+  }
+  .stage.boss{ background:linear-gradient(180deg, #2A3B78 0%, #56689F 100%); border-color:#1A2550; }
+  .stage .cloud{ position:absolute; }
+  .stage .hill{ position:absolute; bottom:34px; border-radius:50% 50% 0 0; background:#3E9E43; border:3px solid #1F6B25; }
+  .stage .hill-1{ width:170px; height:66px; left:-24px; }
+  .stage .hill-2{ width:130px; height:50px; right:6px; }
+  .stage .pipe{ position:absolute; bottom:32px; width:54px; }
+  .stage .pipe-1{ right:6%; }
+  .stage .ground-strip{
+    position:absolute; left:0; right:0; bottom:0; height:32px;
+    background:repeating-linear-gradient(90deg, var(--ground) 0 34px, var(--ground-dark) 34px 36px);
+    border-top:4px solid var(--ground-line);
+  }
+  .stage.boss .ground-strip{
+    background:repeating-linear-gradient(90deg, #7C5A3C 0 34px, #513722 34px 36px);
+    border-top-color:#33200F;
+  }
+  .stage-foe{
+    position:absolute; left:50%; bottom:36px; transform:translateX(-50%);
+    text-align:center; width:100%;
+  }
+  .stage-foe .foe-emoji{ font-size:4rem; line-height:1; animation:bob 1.6s ease-in-out infinite; }
+  .stage-foe.boss .foe-emoji{ font-size:5rem; }
+  .stage-foe .foe-name{ font-weight:800; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.65); margin-top:4px; }
+  .stage-foe .phase-tag{
+    display:inline-block; margin-top:6px; padding:3px 12px; border-radius:20px;
+    background:rgba(0,0,0,.42); color:#FFEFA8; font-size:.78rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.05em;
+  }
+  .stage-foe .hearts{ color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+  @keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+  .stage-foe.hit{ animation:shake .35s ease; }
+  @keyframes shake{ 0%,100%{ transform:translateX(-50%); } 25%{ transform:translateX(calc(-50% - 8px)); } 75%{ transform:translateX(calc(-50% + 8px)); } }
+
+  /* ══════════ PREGUNTA ══════════ */
+  .question-card{
+    background:var(--panel); border:2px solid #C3D0E8; border-radius:var(--radius);
+    padding:18px 20px; box-shadow:0 4px 14px rgba(10,25,60,.2);
+  }
+  .q-progress{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:.84rem; color:#4A5C7C; font-weight:700; letter-spacing:.03em; margin-bottom:4px;
+  }
+  .q-topic{
+    display:inline-block; background:#EAF1FF; color:#1B3F86; border:1px solid #B9CDF0;
+    border-radius:20px; padding:3px 12px; font-size:.8rem; font-weight:700; margin-bottom:10px;
+  }
+  .q-text{ font-size:1.14rem; font-weight:700; color:#16305C; margin-bottom:14px; }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .option{
+    text-align:left; width:100%; padding:14px 16px; font-size:1.02rem; font-family:inherit;
+    background:#F8FAFF; border:2px solid #B9CDF0; border-radius:10px; color:var(--ink);
+    cursor:pointer; transition:border-color .12s, background .12s, transform .08s;
+  }
+  .option:hover:not(:disabled){ border-color:#2F63C8; background:#EEF4FF; }
+  .option:active:not(:disabled){ transform:scale(.99); }
+  .option:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+  .option:disabled{ cursor:default; }
+  .option.correct{ background:var(--ok-bg); border-color:var(--ok); font-weight:700; }
+  .option.wrong{ background:var(--bad-bg); border-color:var(--bad); }
+  .option .letter{
+    display:inline-block; font-weight:800; color:#1B3F86; margin-right:9px;
+    background:#DCE8FF; border-radius:6px; padding:1px 7px;
+  }
+  .feedback{
+    margin-top:14px; padding:13px 15px; border-radius:10px; font-size:1rem; font-weight:700;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.ok{ background:var(--ok-bg); color:#14532D; border-left:5px solid var(--ok); }
+  .feedback.bad{ background:var(--bad-bg); color:#7A171C; border-left:5px solid var(--bad); }
+  .feedback .fb-title{ display:block; margin-bottom:6px; font-size:1.04rem; }
+  .exp-block{ margin-top:10px; padding:12px 14px; background:#F3F7FF; border-left:5px solid #2F63C8; border-radius:8px; font-weight:500; }
+  .exp-block .exp-head{ display:block; font-weight:800; color:#1B3F86; margin-bottom:6px; font-size:.9rem; text-transform:uppercase; letter-spacing:.04em; }
+  .exp-row{ margin-bottom:7px; }
+  .exp-row:last-child{ margin-bottom:0; }
+  .exp-label{
+    display:inline-block; background:#16305C; color:#FFEFA8; border-radius:6px;
+    padding:1px 8px; margin-right:7px; font-size:.78rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.03em;
+  }
+  .exp-text{ color:#26364F; font-size:.96rem; }
+  .fb-actions{ margin-top:12px; }
+
+  /* ══════════ RESULTADOS ══════════ */
+  .result-box{ text-align:center; padding:24px 18px; }
+  .result-box .big-emoji{ font-size:3.6rem; line-height:1.2; }
+  .result-box h2{ font-size:1.7rem; margin:8px 0 6px; color:#16305C; }
+  .result-box .sub{ color:#4A5C7C; margin-bottom:14px; }
+  .grade-label{ color:#4A5C7C; font-size:.9rem; text-transform:uppercase; letter-spacing:.06em; }
+  .grade-big{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:3.4rem; font-weight:800; color:#16305C; line-height:1.1;
+  }
+  .stats-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0; }
+  .stat{ background:#F4F8FF; border:2px solid #C3D0E8; border-radius:10px; padding:12px 6px; }
+  .stat .num{ font-size:1.5rem; font-weight:800; color:#16305C; }
+  .stat .lbl{ font-size:.76rem; color:#4A5C7C; }
+  .save-status{ margin-top:12px; font-size:.96rem; font-weight:700; min-height:1.4em; }
+  .save-status.ok{ color:var(--ok); }
+  .save-status.warn{ color:#9A6A00; }
+
+  /* ══════════ REVISIÓN ══════════ */
+  .review-box{ margin-top:16px; text-align:left; }
+  .review-item{ background:#F8FAFF; border:1px solid #C3D0E8; border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+  .review-item .rq{ font-weight:700; color:#16305C; margin-bottom:6px; }
+  .review-item .rq .rq-n{
+    display:inline-block; background:#16305C; color:#FFEFA8; border-radius:6px;
+    padding:1px 8px; margin-right:7px; font-size:.8rem;
+  }
+  .review-item .ra{ font-size:.94rem; margin-bottom:3px; }
+  .review-item .ra .tag{ font-weight:800; }
+  .review-item .ra .tag.yours{ color:var(--bad); }
+  .review-item .ra .tag.right{ color:var(--ok); }
+
+  /* ══════════ MODALES ══════════ */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(8,16,38,.76); z-index:60;
+    align-items:flex-start; justify-content:center; padding:26px 14px; overflow-y:auto;
+  }
+  .modal-overlay[hidden]{ display:none; }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background:#F7FAFF; border:3px solid var(--gold); border-radius:var(--radius);
+    max-width:760px; width:100%; padding:22px; box-shadow:0 12px 34px rgba(0,0,0,.5);
+  }
+  .modal h2{ font-size:1.4rem; margin-bottom:10px; color:#16305C; }
+  .modal h3{ font-size:1.05rem; margin:14px 0 6px; color:#16305C; }
+  .modal-close{
+    float:right; background:none; border:none; font-size:1.5rem; cursor:pointer;
+    color:#5A6B8C; padding:2px 9px; border-radius:8px;
+  }
+  .modal-close:hover{ background:rgba(0,0,0,.08); }
+  .modal ul{ padding-left:22px; margin-bottom:10px; }
+  .modal ul li{ margin-bottom:7px; }
+  .modal-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .rules-locked{ opacity:.45; }
+  .rules-check{
+    display:flex; gap:11px; align-items:flex-start; margin-top:14px;
+    background:#FFF6D8; border:2px solid var(--block); border-radius:10px; padding:12px 14px;
+    cursor:pointer; font-weight:600;
+  }
+  .rules-check input{ width:22px; height:22px; margin-top:2px; flex:none; cursor:pointer; }
+  .teacher-login{ text-align:center; padding:18px 0; }
+  .teacher-login input{
+    padding:13px 15px; font-size:1.05rem; border:2px solid #9FB2D4;
+    border-radius:10px; width:260px; max-width:100%; font-family:inherit;
+  }
+  .teacher-panel table{ width:100%; border-collapse:collapse; margin:12px 0; font-size:.9rem; }
+  .teacher-panel th, .teacher-panel td{ border:1px solid #C3D0E8; padding:8px 9px; text-align:left; }
+  .teacher-panel th{ background:#16305C; color:var(--gold); font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+  .teacher-panel tr:nth-child(even) td{ background:rgba(0,0,0,.03); }
+  .teacher-controls{ display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; }
+  .teacher-trigger{
+    position:fixed; top:10px; right:10px; width:20px; height:20px; border-radius:50%;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.4);
+    cursor:pointer; z-index:50; opacity:.5; color:#fff; font-size:.7rem; line-height:1;
+  }
+  .teacher-trigger:hover{ opacity:1; background:rgba(255,255,255,.34); }
+  .table-wrap{ overflow-x:auto; }
+
+  /* ══════════ TOAST ══════════ */
+  #toast{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:80;
+    background:#0E1730; color:#FFEFA8; padding:13px 20px; border-radius:10px;
+    border:2px solid var(--gold); font-weight:700; font-size:.96rem;
+    box-shadow:0 8px 22px rgba(0,0,0,.45); display:none; pointer-events:none;
+    max-width:92vw; text-align:center;
+  }
+  #toast.show{ display:block; }
+
+  /* ══════════ RESPONSIVE ══════════ */
+  @media (max-width:640px){
+    body{ font-size:16px; }
+    .banner h1{ font-size:1.85rem; }
+    .banner{ padding:16px 12px 12px; }
+    .scene{ height:132px; }
+    .stage{ height:162px; }
+    .stage-foe .foe-emoji{ font-size:3.2rem; }
+    .stage-foe.boss .foe-emoji{ font-size:4rem; }
+    .world-foes{ grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:repeat(3,1fr); gap:6px; }
+    .hud-inner{ gap:6px; }
+    .hud-item{ padding:3px 8px; }
+    .hud-lbl{ display:none; }
+    .hud-map{ margin-left:0; width:100%; }
+    .btn{ width:100%; }
+    .btn-wide{ min-width:0; }
+    .modal-actions .btn{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HUD ══════════ -->
+<div id="hud" aria-live="polite">
+  <div class="hud-inner">
+    <div class="hud-item"><span class="hud-ico">🪙</span><span class="hud-val" id="hudCoins">0</span><span class="hud-lbl">Monedas</span></div>
+    <div class="hud-item"><span class="hud-ico">❤️</span><span class="hud-val" id="hudLives">3</span><span class="hud-lbl">Vidas</span></div>
+    <div class="hud-item"><span class="hud-ico">🏆</span><span class="hud-val" id="hudScore">0</span><span class="hud-lbl">Aciertos</span></div>
+    <div class="hud-item"><span class="hud-ico">🌎</span><span class="hud-val" id="hudWorld">1-1</span><span class="hud-lbl">Mundo</span></div>
+    <div class="hud-map" id="hudMap"></div>
+  </div>
+</div>
+
+<!-- ══════════ PANTALLA DE INICIO ══════════ -->
+<section id="screen-intro" class="screen active">
+  <div class="banner">
+    <div class="banner-coins" aria-hidden="true"><span class="coin"></span><span class="coin"></span><span class="coin"></span></div>
+    <h1 id="appTitle">Mario Bros</h1>
+    <p class="subtitle" id="appSubtitle">Historia y Educación para la Ciudadanía · 1BGU</p>
+    <p class="unit" id="appUnit">Cinco mundos, cinco peleas, una sola nota</p>
+    <svg class="castle-svg" viewBox="0 0 160 120" role="img" aria-label="Castillo de ladrillos">
+      <g fill="#C0392B" stroke="#8E2A20" stroke-width="2">
+        <rect x="18" y="58" width="44" height="60"/>
+        <rect x="60" y="36" width="40" height="82"/>
+        <rect x="102" y="58" width="44" height="60"/>
+        <rect x="18" y="48" width="10" height="12"/>
+        <rect x="38" y="48" width="10" height="12"/>
+        <rect x="60" y="26" width="10" height="12"/>
+        <rect x="80" y="26" width="10" height="12"/>
+        <rect x="102" y="48" width="10" height="12"/>
+        <rect x="122" y="48" width="10" height="12"/>
+      </g>
+      <rect x="72" y="90" width="16" height="28" rx="7" fill="#3A2410"/>
+      <rect x="30" y="70" width="10" height="12" fill="#3A2410"/>
+      <rect x="108" y="70" width="10" height="12" fill="#3A2410"/>
+      <g fill="#FCE044">
+        <rect x="34" y="42" width="12" height="12"/><rect x="74" y="18" width="12" height="12"/>
+        <rect x="114" y="42" width="12" height="12"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="scene" aria-hidden="true">
+    <svg class="cloud cloud-1" viewBox="0 0 120 50"><g fill="#fff"><ellipse cx="42" cy="32" rx="36" ry="18"/><ellipse cx="72" cy="26" rx="26" ry="21"/><ellipse cx="96" cy="33" rx="22" ry="15"/></g></svg>
+    <svg class="cloud cloud-2" viewBox="0 0 120 50"><g fill="#fff"><ellipse cx="42" cy="32" rx="36" ry="18"/><ellipse cx="72" cy="26" rx="26" ry="21"/><ellipse cx="96" cy="33" rx="22" ry="15"/></g></svg>
+    <svg class="cloud cloud-3" viewBox="0 0 120 50"><g fill="#fff"><ellipse cx="42" cy="32" rx="36" ry="18"/><ellipse cx="72" cy="26" rx="26" ry="21"/><ellipse cx="96" cy="33" rx="22" ry="15"/></g></svg>
+    <div class="hill hill-1"></div>
+    <div class="hill hill-2"></div>
+    <div class="pipe pipe-1"><span class="pipe-rim"></span><span class="pipe-body"></span></div>
+    <div class="pipe pipe-2"><span class="pipe-rim"></span><span class="pipe-body"></span></div>
+    <div class="qblock qblock-1">?</div>
+    <div class="qblock qblock-2">?</div>
+    <div class="ground-strip"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cómo jugar</h2>
+    <ol>
+      <li>Elige tu nombre de la lista y lee las reglas.</li>
+      <li>Viaja por los cinco mundos. Cada mundo tiene cinco preguntas.</li>
+      <li>En cada mundo peleas contra un enemigo y, al final, contra el jefe de ese mundo.</li>
+      <li>Cada respuesta correcta da una moneda y quita un corazón al rival.</li>
+      <li>Cada respuesta equivocada te quita una vida. Empiezas cada mundo con tres vidas.</li>
+      <li>Si el jefe no cae, repites el mundo con otras preguntas. Tienes tres intentos por mundo.</li>
+      <li>Si te quedas sin vidas, la partida termina y se guarda la nota que tengas en ese momento.</li>
+    </ol>
+    <div class="note">Solo se permite un intento por estudiante. Al terminar, tu nota queda guardada y no puedes volver a jugar.</div>
+  </div>
+
+  <div class="card">
+    <label for="studentSelect">Tu nombre</label>
+    <select id="studentSelect">
+      <option value="">Elige tu nombre</option>
+    </select>
+    <div id="nameError" class="error"></div>
+    <div id="resumeBox" class="note" hidden></div>
+  </div>
+
+  <button class="btn btn-gold btn-block btn-wide" id="btnStart" disabled>Comenzar aventura</button>
+</section>
+
+<!-- ══════════ PRESENTACIÓN DEL MUNDO ══════════ -->
+<section id="screen-world" class="screen">
+  <div class="world-card">
+    <span class="world-badge" id="worldCode">Mundo 1-1</span>
+    <h2 id="worldName">Pradera del Alba</h2>
+    <p class="world-sub" id="worldSubtopic">Tema de este mundo</p>
+    <div class="world-foes">
+      <div class="foe-box">
+        <div class="foe-emoji" id="worldEnemyEmoji">🍄</div>
+        <div class="foe-name" id="worldEnemyName">Goomba</div>
+        <div class="foe-role">Enemigo del camino</div>
+        <div class="hearts" id="worldEnemyHearts"></div>
+      </div>
+      <div class="foe-box boss">
+        <div class="foe-emoji" id="worldBossEmoji">🐲</div>
+        <div class="foe-name" id="worldBossName">Jefe del mundo</div>
+        <div class="foe-role">Jefe del castillo</div>
+        <div class="hearts" id="worldBossHearts"></div>
+      </div>
+    </div>
+    <button class="btn btn-green btn-wide" id="btnEnterWorld">Entrar al mundo</button>
+  </div>
+</section>
+
+<!-- ══════════ BATALLA ══════════ -->
+<section id="screen-battle" class="screen">
+  <div class="stage" id="stage">
+    <svg class="cloud cloud-1" viewBox="0 0 120 50"><g fill="#fff"><ellipse cx="42" cy="32" rx="36" ry="18"/><ellipse cx="72" cy="26" rx="26" ry="21"/><ellipse cx="96" cy="33" rx="22" ry="15"/></g></svg>
+    <svg class="cloud cloud-2" viewBox="0 0 120 50"><g fill="#fff"><ellipse cx="42" cy="32" rx="36" ry="18"/><ellipse cx="72" cy="26" rx="26" ry="21"/><ellipse cx="96" cy="33" rx="22" ry="15"/></g></svg>
+    <div class="hill hill-1"></div>
+    <div class="hill hill-2"></div>
+    <div class="pipe pipe-1"><span class="pipe-rim"></span><span class="pipe-body"></span></div>
+    <div class="ground-strip"></div>
+    <div class="stage-foe" id="stageFoe">
+      <div class="foe-emoji" id="foeEmoji">🍄</div>
+      <div class="foe-name" id="foeName">Goomba</div>
+      <div class="hearts" id="foeHearts"></div>
+      <div class="phase-tag" id="phaseTag">Enemigo del camino</div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-progress" id="qProgress">Pregunta 1 de 5</div>
+    <div class="q-topic" id="qTopic">Tema</div>
+    <p class="q-text" id="qText">Enunciado de la pregunta</p>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="battleFeedback"></div>
+    <div class="fb-actions" id="fbActions"></div>
+  </div>
+</section>
+
+<!-- ══════════ MUNDO SUPERADO ══════════ -->
+<section id="screen-world-clear" class="screen">
+  <div class="card result-box">
+    <div class="big-emoji">🎉</div>
+    <h2 id="wcTitle">¡Mundo superado!</h2>
+    <p class="sub" id="wcSub">Derrotaste al jefe de este mundo.</p>
+    <div class="stats-grid">
+      <div class="stat"><div class="num" id="wcCorrect">0</div><div class="lbl">Aciertos del mundo</div></div>
+      <div class="stat"><div class="num" id="wcTotal">5</div><div class="lbl">Preguntas del mundo</div></div>
+      <div class="stat"><div class="num" id="wcLives">3</div><div class="lbl">Vidas</div></div>
+    </div>
+    <button class="btn btn-gold btn-wide" id="btnNextWorld">Siguiente mundo</button>
+  </div>
+</section>
+
+<!-- ══════════ FIN DE PARTIDA ══════════ -->
+<section id="screen-gameover" class="screen">
+  <div class="card result-box">
+    <div class="big-emoji" id="goEmoji">💀</div>
+    <h2 id="goTitle">Te quedaste sin vidas</h2>
+    <p class="sub" id="goSub">La aventura termina aquí.</p>
+    <div class="stats-grid">
+      <div class="stat"><div class="num" id="goCorrect">0</div><div class="lbl">Aciertos</div></div>
+      <div class="stat"><div class="num" id="goTotal">25</div><div class="lbl">Preguntas</div></div>
+      <div class="stat"><div class="num" id="goWorlds">0</div><div class="lbl">Mundos superados</div></div>
+    </div>
+    <button class="btn btn-gold btn-wide" id="btnSeeGrade">Ver mi nota</button>
+  </div>
+</section>
+
+<!-- ══════════ VICTORIA FINAL ══════════ -->
+<section id="screen-victory" class="screen">
+  <div class="card result-box">
+    <div class="big-emoji" id="finalEmoji">🏆</div>
+    <h2 id="finalTitle">¡Aventura completada!</h2>
+    <p class="sub" id="finalSub">Venciste a los cinco jefes de los cinco mundos.</p>
+    <div class="grade-label">Tu nota</div>
+    <div class="grade-big" id="finalGrade">0.0</div>
+    <div class="stats-grid">
+      <div class="stat"><div class="num" id="finCorrect">0</div><div class="lbl">Aciertos</div></div>
+      <div class="stat"><div class="num" id="finTotal">25</div><div class="lbl">Preguntas</div></div>
+      <div class="stat"><div class="num" id="finWorlds">5</div><div class="lbl">Mundos superados</div></div>
+    </div>
+    <div class="save-status" id="saveStatus"></div>
+    <button class="btn btn-ghost btn-block" id="btnToggleReview">Ver revisión de respuestas</button>
+    <div class="review-box" id="reviewBox" hidden></div>
+  </div>
+</section>
+
+<!-- ══════════ MODAL DE REGLAS ══════════ -->
+<div class="modal-overlay" id="modal-rules" hidden>
+  <div class="modal">
+    <button class="modal-close" id="btnCloseRules" aria-label="Cerrar">×</button>
+    <h2>Reglas de la evaluación</h2>
+    <div id="rulesBody" class="rules-locked">
+      <ul>
+        <li>Esta evaluación tiene <strong id="rulesCount">25</strong> preguntas, repartidas en <strong id="rulesWorlds">5</strong> mundos.</li>
+        <li>En cada mundo peleas contra un enemigo y después contra el jefe de ese mundo.</li>
+        <li>Cada respuesta correcta da una moneda y quita un corazón al rival. Cada respuesta equivocada te quita una vida.</li>
+        <li>Empiezas cada mundo con tres vidas. Si te quedas sin vidas, la partida termina.</li>
+        <li>Si el jefe no cae, repites el mundo con preguntas nuevas. Tienes tres intentos por mundo.</li>
+        <li><strong>Solo hay un intento.</strong> Cuando termines, tu nota queda guardada y no puedes volver a jugar.</li>
+      </ul>
+    </div>
+    <label class="rules-check" for="rulesCheck">
+      <input type="checkbox" id="rulesCheck">
+      <span>He leído las reglas y acepto empezar la evaluación.</span>
+    </label>
+    <div class="modal-actions">
+      <button class="btn btn-gold" id="btnAcceptRules" disabled>Acepto y comienzo</button>
+      <button class="btn btn-ghost" id="btnCancelRules">Mejor no</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL DOCENTE ══════════ -->
+<div class="modal-overlay" id="modal-teacher" hidden>
+  <div class="modal">
+    <button class="modal-close" id="btnCloseTeacher" aria-label="Cerrar">×</button>
+    <h2>Panel docente</h2>
+    <div id="teacherLogin" class="teacher-login">
+      <label for="teacherKeyInput">Clave del docente</label>
+      <input type="password" id="teacherKeyInput" placeholder="Clave" autocomplete="off">
+      <div style="margin-top:14px;">
+        <button class="btn btn-sm" id="btnValidateKey">Ingresar</button>
+      </div>
+      <div id="teacherKeyError" class="error"></div>
+    </div>
+    <div id="teacherPanel" class="teacher-panel" hidden>
+      <div class="teacher-controls">
+        <button class="btn btn-sm btn-gold" id="btnExport">Exportar a Excel</button>
+        <button class="btn btn-sm btn-danger" id="btnClearAll">Borrar todas las notas</button>
+        <span id="teacherCount" style="align-self:center;color:#4A5C7C;font-size:.9rem;"></span>
+      </div>
+      <div class="table-wrap" id="teacherTableWrap"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Acceso discreto del docente -->
+<button class="teacher-trigger" id="teacherTrigger" title="Acceso del docente" aria-label="Acceso del docente">●</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   1. BANCO DE PREGUNTAS
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ===== BANCO DE PREGUNTAS (inyectado por el coordinador) ===== */
+/* El coordinador inyecta aquí el banco real. La app entiende cualquiera de
+   estas tres formas, todas con la misma estructura interna:
+     a) { exam_id, title, subtitle, points_per_question, total_questions,
+          worlds: [ { id, code, name, enemy, emoji, subtopic,
+                       questions: [ { id, q, options[4], answer(0-3),
+                                      subtopic, difficulty, explanation } ] } ] }
+     b) [ { ...misma forma que (a)... } ]
+     c) [ { id, code, name, ... , questions:[...] }, ... ]  (mundos sueltos)
+   Para inyectar: reemplazar esta línea completa por el banco, o escribir el
+   banco dentro del arreglo. El banco de ejemplo de más abajo solo sirve para
+   probar la app y se sustituye al inyectar el banco real. */
+const QUESTION_BANK = {"exam_id": "mario-bros-economia-1bgu", "title": "Mario y la Economía del Reino", "subtitle": "Historia y Ciudadanía · 1BGU", "points_per_question": 0.4, "total_questions": 25, "worlds": [{"id": 1, "code": "Mundo 1-1", "name": "La Aldea de los Pícaros", "enemy": "Goomba", "emoji": "🍄", "subtopic": "Escasez, necesidades y deseos, recursos limitados, costo de oportunidad y bienes gratuitos", "questions": [{"id": "1-1", "q": "En el Reino Champiñón todos quieren más monedas de las que el tesoro puede repartir. ¿Qué describe mejor esa situación?", "options": ["La escasez: los deseos de la población son ilimitados y los recursos son limitados.", "La abundancia: los recursos disponibles son tantos que cubren todos los deseos.", "El equilibrio: cada deseo de la población se compensa con un recurso disponible.", "La productividad: cada trabajador genera más recursos de los que la población consume."], "answer": 0, "subtopic": "Escasez y recursos limitados", "difficulty": 1, "explanation": "La escasez aparece cuando los deseos humanos son ilimitados y los recursos para satisfacerlos son limitados."}, {"id": "1-2", "q": "Mario puede usar su tiempo para recoger monedas o para saltar sobre Goombas. Al elegir una cosa renuncia a la otra. ¿Qué nombre recibe ese renuncia?", "options": ["El ingreso del jugador, es decir, lo que entra en su bolsillo en cada nivel superado.", "El beneficio secundario, es decir, lo que se gana además del resultado principal.", "El costo de oportunidad, es decir, lo que se sacrifica al elegir una alternativa.", "El costo de la actividad, es decir, lo que se gasta en monedas y tiempo para hacerla."], "answer": 2, "subtopic": "Costo de oportunidad", "difficulty": 1, "explanation": "El costo de oportunidad es el valor de la mejor alternativa a la que se renuncia al elegir una opción."}, {"id": "1-3", "q": "En la Aldea de los Pícaros el agua contaminada del río se reparte sin cobrar a nadie. ¿Cómo se clasifica ese agua?", "options": ["Es un bien gratuito absoluto, porque nadie paga por obtenerla ni por usarla nunca.", "Es un bien gratuito en el precio, aunque tiene un costo social que asume la comunidad.", "No es un bien gratuito, porque en cuanto genera costos deja de tener precio igual a cero.", "Es un bien normal, porque su consumo aumenta cuando sube el precio de mercado."], "answer": 1, "subtopic": "Bienes gratuitos", "difficulty": 2, "explanation": "Un bien gratuito es el que no tiene precio, pero eso no significa que no tenga costo: el agua contaminada impone costos de salud a la comunidad."}, {"id": "1-4", "q": "Los Goombas se reproducen tan rápido que en una semana hay el doble que en la anterior, y el campo de setas sigue siendo el mismo. ¿Qué expresa ese ejemplo?", "options": ["Que los recursos aumentan más rápido que las necesidades de la población en cada periodo económico.", "Que las necesidades de la población se reducen cuando los recursos resultan limitados.", "Que la población se mantiene estable gracias al aumento continuo de sus recursos.", "Que los recursos son limitados mientras las necesidades de la población aumentan sin freno."], "answer": 3, "subtopic": "Escasez y recursos limitados", "difficulty": 2, "explanation": "El ejemplo muestra la escasez: los recursos disponibles no crecen al mismo ritmo que las necesidades de la población."}, {"id": "1-5", "q": "En un nivel, Toad ofrece a Mario dos caminos: uno con muchas monedas y otro con una estrella que da poderes. ¿Qué debe comparar Mario?", "options": ["El costo de oportunidad de cada camino: lo que renuncia a obtener al elegir uno de ellos.", "La cantidad total de monedas de cada camino, sin considerar lo que se deja de ganar en el otro.", "El tiempo que tarda en recorrer cada camino, medido en minutos dentro del nivel.", "La dificultad de cada camino, porque el más difícil siempre da mejores recompensas."], "answer": 0, "subtopic": "Costo de oportunidad", "difficulty": 2, "explanation": "La elección económica pide comparar el costo de oportunidad de cada alternativa, no solo lo que se gana en una de ellas."}]}, {"id": 2, "code": "Mundo 1-2", "name": "El Bosque de las Decisiones", "enemy": "Koopa", "emoji": "🐢", "subtopic": "Las tres preguntas económicas básicas y los medios de resolverlas: el mercado frente a la intervención gubernamental", "questions": [{"id": "2-1", "q": "El rey Koopa ordena al Bosque que fabrique 100 armaduras adicionales este año. ¿Qué pregunta económica básica está resolviendo?", "options": ["Para quién producir, es decir, definir cómo se distribuye lo producido entre toda la población.", "Cómo producir, es decir, elegir la técnica y los recursos que se usan en la elaboración.", "Qué producir, es decir, decidir qué bienes y servicios se producen en la economía del reino.", "Si producir, es decir, decidir si la economía debe crecer o mantenerse estable."], "answer": 2, "subtopic": "Preguntas económicas básicas", "difficulty": 1, "explanation": "Las preguntas económicas básicas son qué o cuánto producir, cómo producir y para quién producir."}, {"id": "2-2", "q": "En el Bosque hay dos canteras y ninguna ley que diga cuál usar. Los herreros compran la piedra de la cantera más cercana. ¿Qué medio resolvieron?", "options": ["El plan del reino, que reparte las canteras entre los talleres según una tabla anual fija.", "El gobierno, que decide de antemano cuánto piedra se extrae en total cada estación del año.", "El gobierno, que ordena a los herreros comprar a la cantera que tenga la piedra más barata.", "El mercado, porque el precio de la piedra guía la decisión de comprar y la de producir."], "answer": 3, "subtopic": "Mercado e intervención gubernamental", "difficulty": 2, "explanation": "Sin normas del Estado, el precio coordina las decisiones de comprar y de vender: es el mercado funcionando."}, {"id": "2-3", "q": "El Bosque enfrenta una sequía que vacía los ríos. El gobierno decide cuánto agua se reparte a cada taller. ¿Qué problema está resolviendo?", "options": ["El de cuánto producir, porque ajusta el volumen de armaduras que se esperan para cada año.", "El de cómo producir y para quién producir, al repartir un recurso escaso entre vecinos.", "El de qué producir, porque cambia el tipo de bien que se fabrica en todo el Bosque.", "El de para quién producir, porque fija qué comunidades reciben el agua primero."], "answer": 1, "subtopic": "Preguntas económicas básicas", "difficulty": 2, "explanation": "Repartir agua entre talleres es decidir cómo se produce y a quién le corresponde el recurso escaso."}, {"id": "2-4", "q": "Los herreros del Bosque quieren discutir quién recibe las armaduras, pero el rey solo se preocupa por no producir de menos. ¿Qué prioridad revela esa situación?", "options": ["Que el gobierno atiende primero el problema de cuánto producir y deja para después el reparto.", "Que el gobierno prioriza el reparto y postpone la decisión sobre cuánto se produce cada año del calendario.", "Que el problema central del Bosque es la técnica usada y no la cantidad de armaduras.", "Que el mercado ya repartió las armaduras y solo queda pendiente el aumento de la producción."], "answer": 0, "subtopic": "Preguntas económicas básicas", "difficulty": 3, "explanation": "El orden en que el Estado atiende sus problemas revela sus prioridades: primero cuánto producir y después para quién."}, {"id": "2-5", "q": "En el Bosque, el rey fija por ley el precio del pan. Ese precio artificial guía las compras de los herreros. ¿Qué se usa para resolver la pregunta de qué producir?", "options": ["La libertad de precios, que permite que el mercado ajuste la producción al trigo disponible cada año.", "La costumbre del Bosque, que fija la producción de pan según las necesidades de cada año.", "El control del gobierno sobre los precios, que guía la producción sin considerar la escasez real.", "La decisión de los talleres, que eligen producir pan porque el precio lo hace rentable."], "answer": 2, "subtopic": "Mercado e intervención gubernamental", "difficulty": 3, "explanation": "Un precio fijado por el Estado manda sobre el mercado y termina guiando la producción, aunque la escasez real no cambie."}]}, {"id": 3, "code": "Mundo 1-3", "name": "El Reino de las Tres Leyes", "enemy": "Cheep Cheep", "emoji": "🐟", "subtopic": "Sistemas económicos: libre mercado, planificada y mixta, quién decide y qué problema resuelve cada uno", "questions": [{"id": "3-1", "q": "En el Reino de las Tres Leyes, el Carnaval decide cada año cuánto pan se produce y quién lo recibe. ¿Qué sistema económico describe esa situación?", "options": ["El sistema de libre mercado, porque la producción sigue los precios que fija la demanda.", "El sistema planificado, porque el Estado central decide qué producir y para quién.", "El sistema mixto, porque el Estado coordina y los particulares producen por su cuenta.", "El sistema feudal, donde el señor del castillo reparte la producción entre sus vasallos."], "answer": 1, "subtopic": "Sistemas económicos", "difficulty": 1, "explanation": "Cuando el Estado central decide qué se produce y para quién, el sistema económico es planificado."}, {"id": "3-2", "q": "En un tramo del Reino, cada panadería fija su propio precio y los clientes compran donde prefieran. ¿Qué sistema económico funciona en ese tramo?", "options": ["El sistema planificado, porque el Estado fija los precios y las cantidades de pan cada día del año.", "El sistema mixto, porque el Estado y las panaderías acuerdan el precio antes de cada venta.", "El sistema de empresa privada, donde el rey no interviene en ninguna decisión económica.", "El libre mercado, porque el precio lo fijan los vendedores y las decisiones son individuales."], "answer": 3, "subtopic": "Sistema de libre mercado", "difficulty": 2, "explanation": "En el libre mercado las decisiones económicas son individuales y los precios los fijan quienes venden."}, {"id": "3-3", "q": "El Rey quiere construir una escuela pública de pesca para los pescadores, que ya pagan sus propias escuelas. ¿Qué problema resuelve el sistema mixto?", "options": ["Combina la decisión del Estado con la actividad privada para ampliar la oferta de educación.", "Elimina la iniciativa privada, porque solo el Estado decide cuánto se educa a los jóvenes.", "Sustituye al libre mercado, porque ninguna actividad privada puede ofrecer servicios de educación.", "No resuelve ningún problema, porque la mezcla de sistemas siempre produce ineficiencia."], "answer": 0, "subtopic": "Sistema económico mixto", "difficulty": 2, "explanation": "El sistema mixto combina la planificación estatal con la iniciativa privada, como cuando el Estado ofrece algo que los particulares ya cubrían."}, {"id": "3-4", "q": "Durante la guerra, el Estado recapta los molinos y ordena cuánto trigo se muele cada semana. ¿Qué rasgo del sistema planificado se está usando?", "options": ["La propiedad estatal de los molinos, que hace que el Estado compre toda la harina del reino.", "La regulación de los precios, que obliga a los molinos a vender la harina al precio fijado.", "El control central de la producción, que fija las cantidades sin depender del precio.", "La adaptación al mercado, que permite al Estado seguir las señales que dan los precios."], "answer": 2, "subtopic": "Sistema económico planificado", "difficulty": 2, "explanation": "En el sistema planificado el Estado fija las cantidades y las decisiones de producción."}, {"id": "3-5", "q": "El plan del Rey reparte la producción entre las panaderías y además permite que los particulares vendan verduras en el mercado. ¿Qué sistema describe ese conjunto?", "options": ["El sistema económico planificado, donde toda la producción del reino depende de la tabla oficial.", "El sistema económico de libre mercado, donde el Estado solo vigila que se cumplan las normas.", "El sistema económico feudal, donde cada señor entrega parte de su cosecha al rey cada año.", "El sistema económico mixto, que combina la planificación del Estado con la actividad de mercado."], "answer": 3, "subtopic": "Sistema económico mixto", "difficulty": 3, "explanation": "El sistema mixto combina la planificación estatal con la actividad privada y de mercado."}]}, {"id": 4, "code": "Mundo 1-4", "name": "El Castillo de la CPP", "enemy": "Piranha Plant", "emoji": "🌿", "subtopic": "Curva de posibilidades de producción: supuestos, características, costo de oportunidad y crecimiento real", "questions": [{"id": "4-1", "q": "En el Castillo, el rey solo puede elegir entre pescar y sembrar, porque la tierra y el agua son limitadas. ¿Qué supuesto de la CPP representa esa restricción?", "options": ["Los recursos son ilimitados y pueden destinarse a todos los usos posibles.", "Los recursos son limitados y admiten más de un uso alternativo posible.", "La tecnología se mantiene constante durante todo el periodo que se analiza.", "El precio del mercado equilibra siempre la oferta con la demanda de pescado."], "answer": 1, "subtopic": "Supuestos de la curva de posibilidades de producción", "difficulty": 1, "explanation": "La CPP supone recursos limitados que pueden destinarse a usos alternativos, por eso obliga a elegir."}, {"id": "4-2", "q": "En el Castillo, la curva muestra que producir más pescado obliga a sembrar menos. ¿Qué explica ese movimiento sobre la misma curva?", "options": ["El costo de oportunidad del pescado, expresado en toneladas de sembradio que se dejan de producir.", "El desplazamiento de la curva, que se mueve hacia la izquierda cuando aumenta la pesca.", "El aumento de las posibilidades de producción, que amplía el conjunto de bienes que el reino alcanza.", "La eficiencia productiva, que mejora cuando los recursos ociosos se ponen a trabajar mejor."], "answer": 0, "subtopic": "Costo de oportunidad en la curva de posibilidades de producción", "difficulty": 2, "explanation": "Meterse sobre la misma curva es cambiar la mezcla de producción; por eso sube el costo de oportunidad del pescado."}, {"id": "4-3", "q": "En el Castillo hay dos pescadores ociosos que podrían trabajar mientras los demás pescan. ¿Qué muestra esa situación en la CPP?", "options": ["Que la curva se desplaza, porque más trabajadores amplían las posibilidades de producción.", "Que el punto de la curva no es eficiente, porque no se usa toda la capacidad instalada.", "Que existen recursos ociosos, es decir, capacidad de producción disponible que no se usa.", "Que el costo de oportunidad del pescado baja, porque hay más manos disponibles para pescar."], "answer": 2, "subtopic": "Recursos ociosos y eficiencia", "difficulty": 2, "explanation": "Los recursos ociosos muestran que un punto interior de la curva es ineficiente: hay producción sin usar."}, {"id": "4-4", "q": "En el Castillo hay minas de oro y campos de maíz. Pasar un trabajador de las minas al maíz hace que cada unidad de oro cueste cinco de maíz, cuando antes costaba tres. ¿Qué cambió?", "options": ["La eficiencia del Castillo mejoró, porque los trabajadores ahora se mueven entre minas y campos.", "Las posibilidades de producción disminuyeron, porque el total de bienes alcanzables se reduce.", "La curva se desplazó hacia adentro, porque la economía perdió capacidad de producir todo tipo de bienes.", "El costo de oportunidad del oro aumentó, porque cada unidad obtenida exige renunciar a más maíz."], "answer": 3, "subtopic": "Costo de oportunidad creciente", "difficulty": 2, "explanation": "Cuando el costo de oportunidad va en aumento, la curva es cóncava: producir más de un bien obliga a renunciar a más del otro."}, {"id": "4-5", "q": "El Castillo descubre una técnica nueva de pesca que multiplica el pescado sin necesitar más pescadores. ¿Qué efecto tiene sobre la CPP?", "options": ["Mueve el punto sobre la curva, porque los mismos pescadores reparten mejor su tiempo de pesca diaria.", "Aumenta las posibilidades de producción, porque con los mismos recursos se obtiene más pescado.", "Reduce la escasez de recursos, porque el castillo dispone de más tiempo libre para pescar.", "No altera la curva, porque la técnica nueva solo mejora la calidad del pescado capturado."], "answer": 1, "subtopic": "Crecimiento real y aumento de las posibilidades de producción", "difficulty": 3, "explanation": "El crecimiento real amplía las posibilidades de producción: la curva se desplaza hacia afuera porque hay más bienes alcanzables con los mismos recursos."}]}, {"id": 5, "code": "Mundo 1-5", "name": "La Torre del Rey Bowser", "enemy": "Bowser", "emoji": "🐲", "subtopic": "Pensamiento económico: Smith, utilidad y margen, ley de Say, marxismo, keynesianismo, monetarismo, economía circular", "questions": [{"id": "5-1", "q": "En el siglo XVIII, Adam Smith defiende que el mercado libre y la competencia bastan para ordenar la economía. ¿Qué idea propone?", "options": ["El intervencionismo, es decir, la idea de que el Estado debe dirigir la producción y los precios.", "El keynesianismo, es decir, la idea de que el Estado debe compensar la falta de demanda en las crisis.", "El laissez faire, es decir, la idea de que el mercado se regula solo sin intervención del Estado.", "El marxismo, es decir, la idea de que los trabajadores deben tomar el control de la economía."], "answer": 2, "subtopic": "Adam Smith y el laissez faire", "difficulty": 1, "explanation": "Smith es el gran referente del laissez faire: confianza en el mercado y rechazo de la intervención del Estado."}, {"id": "5-2", "q": "En el siglo XIX, la microeconomía clásica estudia la utilidad que obtiene una persona al elegir. ¿Qué mide el concepto de margen en esa teoría?", "options": ["El beneficio adicional que una persona obtiene al pasar de una unidad a la siguiente.", "El costo total que se paga por obtener una unidad extra de producto en la fábrica.", "La diferencia entre el precio pagado y el precio mínimo que aceptaría el vendedor.", "El porcentaje de impuestos que el Estado cobra sobre cada venta hecha en el mercado del reino."], "answer": 0, "subtopic": "Utilidad y concepto de margen", "difficulty": 2, "explanation": "El análisis marginal compara el beneficio adicional de cada unidad con su costo adicional."}, {"id": "5-3", "q": "En el siglo XIX, la ley de Say asegura que la producción genera su propia demanda. ¿Qué respondió Marx a esa idea?", "options": ["Que la demanda siempre falla y por eso el Estado debe planificar toda la producción.", "Que el problema no es el sistema económico sino la falta de educación de los trabajadores.", "Que la producción destruye los recursos naturales y por eso el Estado debe regularla.", "Que el sistema concentra la riqueza y explota a los trabajadores, aunque produzca bienes."], "answer": 3, "subtopic": "Ley de Say y crítica marxista", "difficulty": 2, "explanation": "La ley de Say describe un mercado que se equilibra solo; Marx la critica porque el sistema explota a los trabajadores."}, {"id": "5-4", "q": "En el siglo XX, Keynes y la corriente keynesiana defienden que el Estado actúe cuando el mercado no funciona bien. ¿Qué propuesta los caracteriza?", "options": ["Reducir el gasto público y el dinero en circulación, con austeridad de tipo monetarista.", "Actuar sobre la demanda en las crisis, con políticas keynesianas de gasto público y fiscal.", "Eliminar toda intervención del Estado, dejando que el precio del dinero guíe la economía.", "Fijar por ley los precios de los bienes básicos, con una planificación completa de toda la economía."], "answer": 1, "subtopic": "Revolución keynesiana y contrarrevolución monetarista", "difficulty": 2, "explanation": "El keynesianismo usa la política macroeconómica para sostener la demanda; los monetaristas responden que hay que ajustar el dinero y el gasto."}, {"id": "5-5", "q": "En el siglo XXI, la economía conductual observa las decisiones reales de las personas y la economía circular busca cerrar los ciclos de los materiales. ¿Qué rasgos distinguen ese momento?", "options": ["El regreso del keynesianismo y el abandono de toda política macroeconómica del Estado.", "La defensa del laissez faire y la confianza en que el mercado resuelve solo los problemas ambientales.", "El diálogo con otras disciplinas y el cuidado del medio ambiente en el uso de los recursos.", "La crítica marxista como eje central y el abandono del estudio de la economía real."], "answer": 2, "subtopic": "Economía conductual y economía circular", "difficulty": 3, "explanation": "El pensamiento del siglo XXI abre el diálogo con la psicología y empuja hacia una economía circular que respete el medio ambiente."}]}]};
+/* ===== FIN BANCO ===== */
+
+/* ─────────── BANCO DE EJEMPLO (solo para pruebas; se sustituye al inyectar) ─────────── */
+const QUESTION_BANK_EJEMPLO = {
+  exam_id: 'mario-bros-economia-1bgu',
+  title: 'Mario Bros',
+  subtitle: 'Historia y Educación para la Ciudadanía · 1BGU',
+  unit: 'Unidad 4 · Introducción a la Economía',
+  points_per_question: 2.5,
+  total_questions: 4,
+  worlds: [
+    {
+      id: 1, code: '1-1', name: 'Valle del PIB', enemy: 'Goomba', emoji: '🍄',
+      subtopic: 'Producto interior bruto real y nivel general de precios',
+      questions: [
+        {
+          id: 'w1q1',
+          q: '¿Qué mide el producto interior bruto real?',
+          options: [
+            'El valor de la producción de un país calculado a precios constantes',
+            'El valor de toda la producción de un país a los precios del año en curso',
+            'La cantidad de dinero que circula en la economía durante el año',
+            'La cantidad de personas ocupadas en el sector secundario de la economía'
+          ],
+          answer: 0,
+          subtopic: 'Producto interior bruto real',
+          difficulty: 1,
+          explanation: 'Mecanismo: El producto interior bruto real valora la producción a precios constantes, de modo que un aumento del nivel general de precios no se confunde con más producción.\nExplicación: La diferencia entre el producto interior bruto nominal y el producto interior bruto real es el deflactor del producto interior bruto.'
+        },
+        {
+          id: 'w1q2',
+          q: '¿Qué ocurre con el producto interior bruto real de un país cuando sube el nivel general de precios y la producción física no cambia?',
+          options: [
+            'Se mantiene igual, porque el producto interior bruto real usa precios constantes',
+            'Aumenta, porque ahora los productos valen más en el mercado',
+            'Disminuye, porque el nivel general de precios subió',
+            'Depende del tipo de cambio que fije el banco central'
+          ],
+          answer: 0,
+          subtopic: 'Producto interior bruto real y deflactor',
+          difficulty: 2,
+          explanation: 'Mecanismo: Al calcular el producto interior bruto real se deflacta el producto interior bruto nominal con el deflactor del producto interior bruto, y así se separa el efecto precio del efecto volumen.\nLímite 1: Con inflación, el producto interior bruto nominal sube aunque la producción real no cambie.\nLímite 2: El deflactor del producto interior bruto usa los precios del año en curso y los del año base.'
+        }
+      ]
+    },
+    {
+      id: 2, code: '1-2', name: 'Cerro de la Demanda', enemy: 'Koopa', emoji: '🐢',
+      subtopic: 'Demanda agregada, oferta agregada de largo plazo y producción potencial',
+      questions: [
+        {
+          id: 'w2q1',
+          q: '¿Qué relación tiene la oferta agregada de largo plazo con la producción potencial de una economía?',
+          options: [
+            'Fija la producción potencial de la economía, con pleno empleo de los recursos',
+            'Se desplaza a la izquierda cada vez que sube el nivel general de precios',
+            'Coincide con la demanda agregada en cualquier situación de la economía',
+            'Determina la tasa de interés que fija el banco central del país'
+          ],
+          answer: 0,
+          subtopic: 'Oferta agregada de largo plazo',
+          difficulty: 2,
+          explanation: 'Mecanismo: La oferta agregada de largo plazo es vertical respecto al nivel general de precios y refleja el potencial productivo del país: trabajo, capital, recursos naturales y tecnología.\nExplicación: El nivel natural de actividad es la tasa de desempleo no aceleradora de la inflación, es decir, el nivel de desempleo en el que la inflación se mantiene estable.'
+        },
+        {
+          id: 'w2q2',
+          q: '¿Qué ocurre en el mercado de bienes cuando la demanda agregada aumenta y la oferta agregada de largo plazo no se ajusta?',
+          options: [
+            'El nivel general de precios sube y la producción real aumenta por encima del potencial',
+            'El nivel general de precios baja y la producción real se contrae',
+            'El nivel general de precios no cambia y la producción real cae',
+            'La producción real no cambia y el nivel general de precios baja'
+          ],
+          answer: 0,
+          subtopic: 'Demanda agregada y oferta agregada de largo plazo',
+          difficulty: 3,
+          explanation: 'Mecanismo: Un aumento de la demanda agregada desplaza la curva de demanda agregada hacia la derecha; como la oferta agregada de largo plazo es vertical, el ajuste se produce en el nivel general de precios.\nLímite 1: Si la economía está en el límite cero, la respuesta real puede ser mayor y el aumento de precios menor.\nLímite 2: En el largo plazo la oferta agregada de largo plazo se ajusta y la producción real vuelve al potencial.'
+        }
+      ]
+    }
+  ]
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   2. CONFIG
+   ══════════════════════════════════════════════════════════════════════════ */
+const EXAM_ID = 'mario-bros-economia-1bgu';
+const SUPABASE_URL = 'https://iitjrrnndfxqjzkggtog.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_90BfL8Ncg9WyceCdTE5Wzg_9kj14ubv';
+const SUPABASE_CONFIGURED = SUPABASE_URL.indexOf('tu-proyecto') === -1 && SUPABASE_ANON_KEY.indexOf('tu-anon-key') === -1 && SUPABASE_URL.indexOf('PEGAR') === -1 && SUPABASE_ANON_KEY.indexOf('PEGAR') === -1;
+const TEACHER_KEY = 'DOCENTE2026';
+const LS_KEY = 'mario_bros_historia_1bgu_v1';
+const LETTERS = ['A','B','C','D'];
+const START_LIVES = 3;
+const MAX_WORLD_RETRIES = 3;
+const DEFAULT_POINTS = 0.4; /* 25 preguntas, nota sobre 10 */
+
+/* ─────────── NORMALIZACIÓN DEL BANCO ─────────── */
+function normalizeBank(raw){
+  if(!raw) return null;
+  let obj = raw;
+  if(Array.isArray(raw)){
+    if(raw.length === 0) return null;
+    if(raw[0] && typeof raw[0] === 'object' && Array.isArray(raw[0].worlds)) obj = raw[0];
+    else if(raw.every(function(x){ return x && typeof x === 'object' && Array.isArray(x.questions); })) obj = { worlds: raw };
+    else return null;
+  }
+  if(!obj || !Array.isArray(obj.worlds)) return null;
+  const worlds = obj.worlds.filter(function(w){ return w && Array.isArray(w.questions) && w.questions.length > 0; });
+  if(!worlds.length) return null;
+  obj.worlds = worlds;
+  return obj;
+}
+const BANK = normalizeBank(QUESTION_BANK) || normalizeBank(QUESTION_BANK_EJEMPLO);
+const WORLDS = BANK.worlds;
+const TOTAL_QUESTIONS = Number(BANK.total_questions) > 0 ? Number(BANK.total_questions) : WORLDS.reduce(function(s,w){ return s + w.questions.length; }, 0);
+const POINTS_PER_QUESTION = Number(BANK.points_per_question) > 0 ? Number(BANK.points_per_question) : DEFAULT_POINTS;
+const ENEMY_DEFAULTS = [
+  { enemy:'Goomba', emoji:'🍄' },
+  { enemy:'Koopa', emoji:'🐢' },
+  { enemy:'Cheep Cheep', emoji:'🐟' },
+  { enemy:'Piranha Plant', emoji:'🌵' },
+  { enemy:'Bowser', emoji:'🐲' }
+];
+const BOSS_NAME = 'Rey Bowser';
+const BOSS_EMOJI = '🐲';
+
+/* ══════════════════════════════════════════════════════════════════════════
+   3. SUPABASE
+   ══════════════════════════════════════════════════════════════════════════ */
+function supabaseHeaders(){
+  return { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer '+SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+}
+function supabaseGet(path){
+  return fetch(SUPABASE_URL+'/rest/v1/'+path, { headers: supabaseHeaders(), cache: 'no-store' });
+}
+function supabaseSend(path, method, body, prefer){
+  const h = supabaseHeaders();
+  if(prefer) h['Prefer'] = prefer;
+  return fetch(SUPABASE_URL+'/rest/v1/'+path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined });
+}
+/* Lectura con reintentos (1 reintento = 2 intentos en total). */
+function supabaseGetWithRetry(path, attempts){
+  const max = attempts || 2;
+  function attempt(n){
+    return supabaseGet(path)
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .catch(function(err){ if(n < max) return attempt(n+1); throw err; });
+  }
+  return attempt(1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   4. UTILIDADES
+   ══════════════════════════════════════════════════════════════════════════ */
+function $(id){ return document.getElementById(id); }
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+/* Baraja las opciones y devuelve el nuevo índice de la respuesta correcta. */
+function shuffleWithOptions(opts, correctIdx){
+  const order = shuffle(opts.map(function(_,i){ return i; }));
+  return {
+    options: order.map(function(i){ return opts[i]; }),
+    answerIdx: order.indexOf(correctIdx)
+  };
+}
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function normalizeName(s){ return String(s||'').toUpperCase().trim().replace(/\s+/g,' '); }
+
+/* Separación de apellidos y nombres (formato del índice: APELLIDOS NOMBRES).
+   Regla práctica: 2 tokens = 1 apellido + 1 nombre; 3 tokens = 2 + 1;
+   4 tokens = 2 + 2; 5 tokens = 3 + 2; 6 o más = 3 + resto. */
+function parseName(fullName){
+  const tokens = String(fullName).trim().split(/\s+/);
+  let split = 2;
+  if(tokens.length <= 2) split = 1;
+  else if(tokens.length === 3) split = 2;
+  else if(tokens.length === 5) split = 3;
+  else if(tokens.length >= 6) split = 3;
+  else split = 2;
+  return {
+    lastname: tokens.slice(0, split).join(' '),
+    name: tokens.slice(split).join(' ')
+  };
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  const el = $(id);
+  if(el) el.classList.add('active');
+  const hudEl = $('hud');
+  if(hudEl) hudEl.classList.toggle('show', id !== 'screen-intro');
+  window.scrollTo(0,0);
+}
+function showToast(msg, ms){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, ms || 3200);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   5. ESTADO
+   ══════════════════════════════════════════════════════════════════════════ */
+const STATE = {
+  studentFullName:'', studentName:'', studentLastname:'', course:'',
+  worldIndex:0,
+  phase:'enemy',          /* 'enemy' | 'boss' */
+  phaseIndex:0,
+  questions:[],           /* preguntas barajadas del mundo en curso */
+  shuffled:[],            /* {options, answerIdx} por pregunta del mundo en curso */
+  enemyCount:1, bossCount:1,
+  correct:0, coins:0, lives:START_LIVES,
+  worldCorrect:0,
+  retriesLeft:MAX_WORLD_RETRIES,
+  answered:[],            /* respuestas aceptadas (se descartan al repetir el mundo) */
+  clearedWorlds:[],       /* [{code, name, correct, total}] */
+  completed:false, partidaTerminada:false, starting:false
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   6. ROSTER 1BGU
+   ══════════════════════════════════════════════════════════════════════════ */
+const ROSTER = {
+  "1BGU A": [
+    "ALBAN ALTAMIRANO, IVANNA",
+    "ARTEAGA PLAZA, MARIA",
+    "BEJAR JIMENEZ, HELENA",
+    "CADENA RUIZ, ABIGAIL",
+    "CARDENAS ASTUDILLO, JUAN",
+    "CARRILLO PEREZ, MIGUEL",
+    "CASTILLO RAMIREZ, MARCO",
+    "CHONG QUI PEÑAFIEL, MARIA",
+    "DEL SALTO PALACIOS, MA.",
+    "DIAZ VELIZ, EDUARDO",
+    "ESTRADA VERA, ARIANA",
+    "FARFAN LEÓN, LUCIANA",
+    "FERNANDEZ GONZABAY, AMANDA",
+    "FIALLOS, BRUNO",
+    "GALEFSKI MERINO, ALANIS",
+    "GARATE ANDRADE, MANUEL",
+    "LEON, JORGE",
+    "MEDINA GOMEZ, NICOLAS",
+    "MEDINA MOREJON, FABIANNA",
+    "MOHR MOSCOL, LUCAS",
+    "MONCADA, PEDRO",
+    "MONTIEL CEDEÑO, RUTH",
+    "NAVIA ALCIVAR, MIGUEL",
+    "SALAZAR CAMPUZANO, THELMO",
+    "VARGAS CARVAJAL, MATIAS"
+  ],
+  "1BGU B": [
+    "AGUILAR BANCHON, FELIPE",
+    "CARDENAS VASQUEZ, VALENTINA",
+    "DARQUEA GUERRERO, ISABELLA",
+    "DVORQUEZ SAMAN, EITAN",
+    "ENCALADA ZAMBRANO, PATRICK",
+    "FLORES SANCHEZ, VALENTINA",
+    "GARCÉS CABEZAS, DOMÉNICA",
+    "GONZALEZ LOPEZ, ISABELLA",
+    "GONZALEZ VELASCO, ESTEFANÍA",
+    "HIDALGO DROUET, SAMANTHA",
+    "HOYOS ESPIN, AMANDA",
+    "LABRE GALARZA, RAFAELLA",
+    "MOSCOSO MARTINEZ, ALICIA",
+    "MUECKAY SALVATIERRA, LUCAS",
+    "NAHT MUÑOZ, DOMENICA",
+    "NARANJO OJEDA, MAIHA",
+    "ORTIZ CABRERA, DYLAN",
+    "RODRIGUEZ RUIZ, DANNA",
+    "SANTA CRUZ CERÓN, MATTÍAS",
+    "SOLORZANO, SEBASTIAN",
+    "TAPIA GARZON, ANDRES",
+    "VALLEJO HERDOIZA, NICOLÁS",
+    "WENDT LANDIVAR, NATHALIE",
+    "ZAMBRANO MOREIRA, MARIA",
+    "ZAPATIER PEREZ, LEONARDO"
+  ],
+  "1BGU C": [
+    "ALAVA PONCE, ISABELLA",
+    "ALVARADO, RICARDO",
+    "BONILLA CHAVARRIA, JUAN",
+    "CELLERI RAMIREZ, FELIPE",
+    "CHACON REYES, BELEN",
+    "CRUZ PINEDA, DOMENICA",
+    "DE LA CUADRA GARCES, EILEEN",
+    "ENCALADA ZAMBRANO, SURI",
+    "GARCIA VELEZ, GRACE",
+    "GAVILANEZ, WILSON",
+    "GILER CAÑARTE, LUCCIANA",
+    "MARTINEZ VELASQUEZ, WLADIMIR",
+    "MORALES FLORES, EMILIO",
+    "OLIVEIRA YEPEZ, ELIANE",
+    "PALACIOS RECALDE, EDUARDO",
+    "QUIMI CEDILLO, KRYSTELL",
+    "REINA SANCHEZ, NISHMA",
+    "RIVADENEIRA LUZARDO, AMANDA",
+    "RIVERA TINOCO, ALEXA",
+    "TOLEDO CASTILLO, ROBERTO",
+    "TRUJILLO HAILLARD, PEPO",
+    "VERA GILER, DARMIN",
+    "VÉLEZ ZAMBRANO, SAMUEL",
+    "YCAZA MONTJOY, RICARDO"
+  ]
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   7. HUD Y MAPA DE MUNDOS
+   ══════════════════════════════════════════════════════════════════════════ */
+function worldCode(w, idx){ return w.code || ('1-'+(idx+1)); }
+function worldEnemy(w, idx){
+  const d = ENEMY_DEFAULTS[idx] || ENEMY_DEFAULTS[0];
+  return { name: w.enemy || d.enemy, emoji: w.emoji || d.emoji };
+}
+function renderHud(){
+  $('hudCoins').textContent = STATE.coins;
+  $('hudLives').textContent = STATE.lives;
+  $('hudScore').textContent = STATE.correct + '/' + TOTAL_QUESTIONS;
+  const w = WORLDS[STATE.worldIndex];
+  $('hudWorld').textContent = w ? worldCode(w, STATE.worldIndex) : '-';
+  const map = $('hudMap');
+  map.innerHTML = '';
+  WORLDS.forEach(function(ww,i){
+    const d = document.createElement('span');
+    d.className = 'pip' + (i < STATE.worldIndex ? ' done' : (i === STATE.worldIndex ? ' current' : ' locked'));
+    d.textContent = worldCode(ww, i);
+    map.appendChild(d);
+  });
+}
+function renderHearts(el, total, left){
+  el.innerHTML = '';
+  for(let i=0;i<total;i++){
+    const s = document.createElement('span');
+    s.textContent = '❤️';
+    if(i >= left) s.className = 'off';
+    el.appendChild(s);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   8. ROSTER EN EL LISTBOX
+   ══════════════════════════════════════════════════════════════════════════ */
+function buildRoster(){
+  const sel = $('studentSelect');
+  Object.keys(ROSTER).forEach(function(curso){
+    const og = document.createElement('optgroup');
+    og.label = curso;
+    ROSTER[curso].forEach(function(nombre){
+      const op = document.createElement('option');
+      op.value = nombre;
+      op.textContent = nombre;
+      og.appendChild(op);
+    });
+    sel.appendChild(og);
+  });
+}
+function selectedCourse(){
+  const sel = $('studentSelect');
+  const op = sel.options[sel.selectedIndex];
+  if(op && op.parentNode && op.parentNode.tagName === 'OPTGROUP') return op.parentNode.label;
+  return '1BGU';
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   9. PERSISTENCIA LOCAL (intentos parciales)
+   ══════════════════════════════════════════════════════════════════════════ */
+function getLocalAll(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }catch(e){ return {}; }
+}
+function getLocalRecord(fullName){
+  const all = getLocalAll();
+  return all[normalizeName(fullName)] || null;
+}
+function saveLocalRecord(rec){
+  const all = getLocalAll();
+  all[normalizeName(rec.full)] = rec;
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(all)); }catch(e){}
+}
+function saveProgress(){
+  if(!STATE.studentFullName) return;
+  saveLocalRecord({
+    full: STATE.studentFullName,
+    course: STATE.course,
+    worldIndex: STATE.worldIndex,
+    retriesLeft: STATE.retriesLeft,
+    correct: STATE.correct,
+    coins: STATE.coins,
+    lives: STATE.lives,
+    answered: STATE.answered,
+    clearedWorlds: STATE.clearedWorlds,
+    completed: STATE.completed,
+    score: STATE.correct,
+    total: TOTAL_QUESTIONS,
+    grade: Math.round(STATE.correct * POINTS_PER_QUESTION * 10)/10,
+    timestamp: new Date().toISOString()
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   10. GATE DE UN SOLO INTENTO (fail-closed)
+   ══════════════════════════════════════════════════════════════════════════ */
+function recordMatches(rec, normFull, course){
+  const a = normalizeName(((rec.student_lastname||'')+' '+(rec.student_name||'')).trim());
+  const b = normalizeName(((rec.student_name||'')+' '+(rec.student_lastname||'')).trim());
+  const c = normalizeName(((rec.student_lastname||'')+', '+(rec.student_name||'')).trim());
+  if(!(a===normFull || b===normFull || c===normFull)) return false;
+  if(course && rec.course && normalizeName(rec.course) !== normalizeName(course)) return false;
+  return true;
+}
+function isCompletedRow(r){
+  if(!r) return false;
+  if(r.answers && r.answers.completed === true) return true;
+  return false;
+}
+/* Devuelve {blocked, reason, record}. */
+function checkExistingAttempt(fullName, course){
+  const norm = normalizeName(fullName);
+  const local = getLocalRecord(fullName);
+  if(local && local.completed){
+    return Promise.resolve({ blocked:true, reason:'local', record:local });
+  }
+  if(!SUPABASE_CONFIGURED){
+    return Promise.resolve({ blocked:false, reason:'sin-backend' });
+  }
+  const path = 'quiz_results?exam_id=eq.'+EXAM_ID+'&select=student_name,student_lastname,course,score,total,grade,timestamp,answers';
+  return supabaseGetWithRetry(path, 2)
+    .then(function(rows){
+      const found = (rows||[]).filter(isCompletedRow).filter(function(r){ return recordMatches(r, norm, course); })[0];
+      if(found) return { blocked:true, reason:'servidor', record:found };
+      return { blocked:false, reason:'ok' };
+    })
+    .catch(function(err){
+      /* FAIL-CLOSED: si no se puede leer el estado remoto no se abre un intento
+         nuevo. Si el estudiante ya tiene una partida en curso guardada en este
+         dispositivo, se le deja continuar: ese registro prueba que el intento
+         ya fue autorizado en su momento. */
+      if(local && !local.completed && local.answered){
+        return { blocked:false, reason:'continuar' };
+      }
+      return { blocked:true, reason:'sin-conexion', error:err };
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   11. INICIO DE LA AVENTURA
+   ══════════════════════════════════════════════════════════════════════════ */
+function showNameError(html){
+  const el = $('nameError');
+  el.innerHTML = html;
+  el.classList.add('show');
+}
+function hideNameError(){
+  $('nameError').classList.remove('show');
+}
+function onStartClick(){
+  if(STATE.starting) return;
+  const sel = $('studentSelect');
+  const fullName = sel.value.trim();
+  if(!fullName){
+    showNameError('Elige tu nombre de la lista para comenzar.');
+    sel.focus();
+    return;
+  }
+  hideNameError();
+  STATE.starting = true;
+  $('btnStart').disabled = true;
+  $('btnStart').textContent = 'Verificando tu intento...';
+  const course = selectedCourse();
+  checkExistingAttempt(fullName, course).then(function(res){
+    STATE.starting = false;
+    $('btnStart').textContent = 'Comenzar aventura';
+    if(res.blocked){
+      $('btnStart').disabled = false;
+      if(res.reason === 'sin-conexion'){
+        showNameError('No se pudo verificar si ya realizaste esta evaluación. Revisa tu conexión a internet y vuelve a intentar. Por seguridad, el intento queda cerrado mientras el servidor no responda.');
+        return;
+      }
+      const rec = res.record || {};
+      const nota = Number(rec.grade||0).toFixed(1);
+      const aciertos = rec.score != null ? rec.score : '?';
+      const total = rec.total || TOTAL_QUESTIONS;
+      const fecha = rec.timestamp ? new Date(rec.timestamp).toLocaleString('es-EC') : 'fecha desconocida';
+      showNameError('Ya completaste esta evaluación. Tu nota fue <strong>'+nota+'</strong> sobre 10 ('+aciertos+' de '+total+' aciertos), registrada el '+fecha+'. Solo se permite un intento por estudiante.');
+      return;
+    }
+    openRulesModal(fullName, course);
+  });
+}
+
+function openRulesModal(fullName, course){
+  STATE.pendingName = fullName;
+  STATE.pendingCourse = course;
+  $('rulesCount').textContent = TOTAL_QUESTIONS;
+  $('rulesWorlds').textContent = WORLDS.length;
+  $('rulesCheck').checked = false;
+  $('rulesBody').classList.add('rules-locked');
+  $('btnAcceptRules').disabled = true;
+  $('modal-rules').hidden = false;
+  $('modal-rules').classList.add('open');
+  $('btnStart').disabled = true; /* el botón de iniciar queda bloqueado con el modal abierto */
+}
+function closeRulesModal(){
+  $('modal-rules').classList.remove('open');
+  $('modal-rules').hidden = true;
+  $('btnStart').disabled = !$('studentSelect').value;
+}
+function acceptRules(){
+  $('rulesBody').classList.remove('rules-locked');
+  $('btnAcceptRules').disabled = false;
+}
+
+function launchGame(fullName, course){
+  /* Salvaguarda: la partida no arranca sin nombre confirmado. */
+  if(!fullName || !String(fullName).trim()){
+    showNameError('Elige tu nombre de la lista para comenzar.');
+    showScreen('screen-intro');
+    $('btnStart').disabled = !$('studentSelect').value;
+    return;
+  }
+  STATE.studentFullName = fullName;
+  const parsed = parseName(fullName);
+  STATE.studentLastname = parsed.lastname;
+  STATE.studentName = parsed.name;
+  STATE.course = course || selectedCourse();
+  STATE.worldIndex = 0;
+  STATE.correct = 0;
+  STATE.coins = 0;
+  STATE.lives = START_LIVES;
+  STATE.answered = [];
+  STATE.clearedWorlds = [];
+  STATE.completed = false;
+  STATE.partidaTerminada = false;
+  STATE.retriesLeft = MAX_WORLD_RETRIES;
+
+  const local = getLocalRecord(fullName);
+  if(local && !local.completed && local.answered && local.answered.length){
+    /* Continúa la partida: se conservan los mundos ya superados y se reinicia
+       el mundo en curso con preguntas nuevas. */
+    STATE.worldIndex = Math.min(local.worldIndex || 0, WORLDS.length-1);
+    STATE.retriesLeft = local.retriesLeft != null ? local.retriesLeft : MAX_WORLD_RETRIES;
+    STATE.answered = (local.answered||[]).filter(function(a){ return a.wi < STATE.worldIndex; });
+    STATE.correct = STATE.answered.filter(function(a){ return a.ok; }).length;
+    STATE.coins = STATE.correct;
+    STATE.clearedWorlds = local.clearedWorlds || [];
+    prepareWorld();
+    showScreen('screen-battle');
+    renderQuestion();
+    showToast('Continúas tu aventura en el mundo '+worldCode(WORLDS[STATE.worldIndex], STATE.worldIndex)+'.');
+    return;
+  }
+  prepareWorld();
+  showScreen('screen-world');
+  renderWorldIntro();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   12. PREPARACIÓN DEL MUNDO
+   ══════════════════════════════════════════════════════════════════════════ */
+function prepareWorld(){
+  const world = WORLDS[STATE.worldIndex];
+  const n = world.questions.length;
+  const bossCount = Math.max(1, Math.floor(n/2));
+  const enemyCount = Math.max(1, n - bossCount);
+  STATE.bossCount = bossCount;
+  STATE.enemyCount = enemyCount;
+  const order = shuffle(world.questions.map(function(_,i){ return i; }));
+  STATE.questions = order.map(function(i){ return world.questions[i]; });
+  STATE.shuffled = STATE.questions.map(function(q){
+    const correct = (q.answer != null) ? Number(q.answer) : Number(q.correct);
+    return shuffleWithOptions(q.options || [], correct);
+  });
+  STATE.phase = 'enemy';
+  STATE.phaseIndex = 0;
+  STATE.worldCorrect = 0;
+  STATE.lives = START_LIVES;
+  renderHud();
+}
+function renderWorldIntro(){
+  const world = WORLDS[STATE.worldIndex];
+  const foe = worldEnemy(world, STATE.worldIndex);
+  $('worldCode').textContent = 'Mundo '+worldCode(world, STATE.worldIndex);
+  $('worldName').textContent = world.name || ('Mundo '+(STATE.worldIndex+1));
+  $('worldSubtopic').textContent = world.subtopic || '';
+  $('worldEnemyEmoji').textContent = foe.emoji;
+  $('worldEnemyName').textContent = foe.name;
+  $('worldBossEmoji').textContent = BOSS_EMOJI;
+  $('worldBossName').textContent = BOSS_NAME;
+  renderHearts($('worldEnemyHearts'), STATE.enemyCount, STATE.enemyCount);
+  renderHearts($('worldBossHearts'), STATE.bossCount, STATE.bossCount);
+  renderHud();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   13. PREGUNTAS
+   ══════════════════════════════════════════════════════════════════════════ */
+function currentQuestionIndex(){
+  return STATE.phase === 'enemy' ? STATE.phaseIndex : STATE.enemyCount + STATE.phaseIndex;
+}
+function currentFoe(){
+  const world = WORLDS[STATE.worldIndex];
+  if(STATE.phase === 'boss') return { name: BOSS_NAME, emoji: BOSS_EMOJI, role: 'Jefe del castillo', hearts: STATE.bossCount };
+  const foe = worldEnemy(world, STATE.worldIndex);
+  return { name: foe.name, emoji: foe.emoji, role: 'Enemigo del camino', hearts: STATE.enemyCount };
+}
+function foeHeartsLeft(){
+  const world = WORLDS[STATE.worldIndex];
+  if(STATE.phase === 'boss'){
+    const bossAnswers = STATE.answered.filter(function(a){ return a.wi === STATE.worldIndex && a.phase === 'boss'; });
+    const hits = bossAnswers.filter(function(a){ return a.ok; }).length;
+    return Math.max(0, STATE.bossCount - hits);
+  }
+  const enemyAnswers = STATE.answered.filter(function(a){ return a.wi === STATE.worldIndex && a.phase === 'enemy'; });
+  const hits = enemyAnswers.filter(function(a){ return a.ok; }).length;
+  return Math.max(0, STATE.enemyCount - hits);
+}
+function renderQuestion(){
+  const idx = currentQuestionIndex();
+  const q = STATE.questions[idx];
+  const sh = STATE.shuffled[idx];
+  const world = WORLDS[STATE.worldIndex];
+  const foe = currentFoe();
+
+  $('stage').classList.toggle('boss', STATE.phase === 'boss');
+  $('foeEmoji').textContent = foe.emoji;
+  $('foeName').textContent = foe.name;
+  $('phaseTag').textContent = foe.role;
+  renderHearts($('foeHearts'), foe.hearts, foeHeartsLeft());
+
+  const inPhase = (STATE.phase === 'enemy' ? STATE.enemyCount : STATE.bossCount);
+  $('qProgress').textContent = 'Pregunta '+(STATE.phaseIndex+1)+' de '+inPhase+' · '+worldCode(world, STATE.worldIndex)+' · '+world.name;
+  $('qTopic').textContent = q.subtopic || world.subtopic || '';
+  $('qText').textContent = q.q;
+
+  const wrap = $('options');
+  wrap.innerHTML = '';
+  sh.options.forEach(function(opt,i){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option';
+    btn.innerHTML = '<span class="letter">'+LETTERS[i]+'</span>'+escapeHtml(opt);
+    btn.addEventListener('click', function(){ handleAnswer(i); });
+    wrap.appendChild(btn);
+  });
+
+  const fb = $('battleFeedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  $('fbActions').innerHTML = '';
+  renderHud();
+}
+
+/* Render de la explicación con etiquetas explícitas (Mecanismo, Límite 1, ...). */
+function renderExplanation(text){
+  if(!text) return '';
+  const lines = String(text).split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  return lines.map(function(line){
+    const m = line.match(/^(Mecanismo|Límite\s*\d+|Limite\s*\d+|Explicación|Explicacion|Concepto|Tema|Dato|Causa|Efecto)\s*:\s*(.+)$/i);
+    if(m){
+      return '<div class="exp-row"><span class="exp-label">'+escapeHtml(m[1])+'</span><span class="exp-text">'+escapeHtml(m[2])+'</span></div>';
+    }
+    return '<div class="exp-row"><span class="exp-text">'+escapeHtml(line)+'</span></div>';
+  }).join('');
+}
+
+function handleAnswer(selectedIdx){
+  if(STATE.partidaTerminada) return;
+  const idx = currentQuestionIndex();
+  const q = STATE.questions[idx];
+  const sh = STATE.shuffled[idx];
+  const correctIdx = sh.answerIdx;
+  const isCorrect = selectedIdx === correctIdx;
+  const world = WORLDS[STATE.worldIndex];
+
+  const btns = $('options').querySelectorAll('.option');
+  for(let i=0;i<btns.length;i++){
+    btns[i].disabled = true;
+    if(i === correctIdx) btns[i].classList.add('correct');
+    else if(i === selectedIdx) btns[i].classList.add('wrong');
+  }
+
+  STATE.answered.push({
+    wi: STATE.worldIndex,
+    phase: STATE.phase,
+    q: q.q,
+    options: sh.options,
+    correctIdx: correctIdx,
+    selectedIdx: selectedIdx,
+    ok: isCorrect,
+    subtopic: q.subtopic || world.subtopic || '',
+    difficulty: q.difficulty || 1,
+    explanation: q.explanation || ''
+  });
+
+  const fb = $('battleFeedback');
+  if(isCorrect){
+    STATE.correct++;
+    STATE.coins++;
+    STATE.worldCorrect++;
+    fb.className = 'feedback show ok';
+    fb.innerHTML = '<span class="fb-title">¡Correcto! Ganaste una moneda y le quitaste un corazón al rival.</span>'+
+      '<div class="exp-block"><span class="exp-head">Explicación</span>'+renderExplanation(q.explanation)+'</div>';
+    const foeEl = $('stageFoe');
+    foeEl.classList.add('hit');
+    setTimeout(function(){ foeEl.classList.remove('hit'); }, 400);
+  } else {
+    STATE.lives = Math.max(0, STATE.lives - 1);
+    fb.className = 'feedback show bad';
+    fb.innerHTML = '<span class="fb-title">Incorrecto. Te quitaste una vida. Vidas restantes: '+STATE.lives+'.</span>'+
+      '<div class="exp-block"><span class="exp-head">Explicación</span>'+renderExplanation(q.explanation)+'</div>';
+  }
+  renderHearts($('foeHearts'), currentFoe().hearts, foeHeartsLeft());
+  renderHud();
+  saveProgress();
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn-gold';
+  btn.textContent = 'Continuar';
+  btn.addEventListener('click', advance);
+  $('fbActions').innerHTML = '';
+  $('fbActions').appendChild(btn);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   14. AVANCE ENTRE PREGUNTAS Y FIN DE MUNDO
+   ══════════════════════════════════════════════════════════════════════════ */
+function advance(){
+  if(STATE.partidaTerminada) return;
+  if(STATE.lives <= 0){ endGame(false, 'Te quedaste sin vidas.'); return; }
+
+  if(STATE.phase === 'enemy'){
+    STATE.phaseIndex++;
+    if(STATE.phaseIndex >= STATE.enemyCount){
+      STATE.phase = 'boss';
+      STATE.phaseIndex = 0;
+    }
+    renderQuestion();
+    return;
+  }
+  /* fase del jefe */
+  STATE.phaseIndex++;
+  if(STATE.phaseIndex < STATE.bossCount){
+    renderQuestion();
+    return;
+  }
+  /* terminó la pelea contra el jefe */
+  const bossDefeated = foeHeartsLeft() <= 0;
+  if(bossDefeated){
+    worldCleared();
+  } else {
+    bossSurvived();
+  }
+}
+
+function worldCleared(){
+  const world = WORLDS[STATE.worldIndex];
+  STATE.clearedWorlds.push({
+    code: worldCode(world, STATE.worldIndex),
+    name: world.name || '',
+    correct: STATE.worldCorrect,
+    total: STATE.enemyCount + STATE.bossCount
+  });
+  const livesBefore = STATE.lives;
+  STATE.lives = Math.min(START_LIVES, STATE.lives + 1);
+  const lifeGained = STATE.lives > livesBefore;
+  saveProgress();
+  $('wcTitle').textContent = '¡Mundo '+worldCode(world, STATE.worldIndex)+' superado!';
+  $('wcSub').textContent = 'Derrotaste a '+currentFoe().name+' y al '+BOSS_NAME+'.'+
+    (lifeGained ? ' Recuperaste una vida.' : ' Vides con '+STATE.lives+' vidas para el siguiente mundo.');
+  $('wcCorrect').textContent = STATE.worldCorrect;
+  $('wcTotal').textContent = STATE.enemyCount + STATE.bossCount;
+  $('wcLives').textContent = STATE.lives;
+  renderHud();
+  showScreen('screen-world-clear');
+}
+
+function bossSurvived(){
+  const world = WORLDS[STATE.worldIndex];
+  if(STATE.retriesLeft <= 0){
+    endGame(false, 'El '+BOSS_NAME+' de este mundo no cayó y se agotaron tus intentos.');
+    return;
+  }
+  $('goEmoji').textContent = '👑';
+  $('goTitle').textContent = 'El jefe no cayó';
+  $('goSub').textContent = 'El '+BOSS_NAME+' de '+worldCode(world, STATE.worldIndex)+' sigue en pie. Puedes repetir el mundo con otras preguntas. Te quedan '+(STATE.retriesLeft-1)+' intento(s) de repetición.';
+  $('goCorrect').textContent = STATE.correct;
+  $('goTotal').textContent = TOTAL_QUESTIONS;
+  $('goWorlds').textContent = STATE.clearedWorlds.length;
+  $('btnSeeGrade').textContent = 'Repetir el mundo';
+  $('btnSeeGrade').className = 'btn btn-gold btn-wide';
+  $('btnSeeGrade').dataset.action = 'retry';
+  showScreen('screen-gameover');
+}
+
+function retryWorld(){
+  STATE.retriesLeft--;
+  if(STATE.retriesLeft <= 0){
+    endGame(false, 'Se agotaron los intentos de repetición en este mundo.');
+    return;
+  }
+  /* Se descartan las respuestas del mundo fallido: no cuentan para la nota. */
+  STATE.answered = STATE.answered.filter(function(a){ return a.wi !== STATE.worldIndex; });
+  STATE.correct = STATE.answered.filter(function(a){ return a.ok; }).length;
+  STATE.coins = STATE.correct;
+  STATE.lives = START_LIVES;
+  prepareWorld();
+  showScreen('screen-battle');
+  renderQuestion();
+  showToast('Repites el mundo '+worldCode(WORLDS[STATE.worldIndex], STATE.worldIndex)+' con preguntas nuevas.');
+}
+
+function nextWorld(){
+  if(STATE.worldIndex < WORLDS.length - 1){
+    STATE.worldIndex++;
+    STATE.retriesLeft = MAX_WORLD_RETRIES;
+    prepareWorld();
+    showScreen('screen-world');
+    renderWorldIntro();
+  } else {
+    endGame(true, '');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   15. FIN DE LA AVENTURA Y GUARDADO
+   ══════════════════════════════════════════════════════════════════════════ */
+function endGame(completedAll, reason){
+  STATE.partidaTerminada = true;
+  STATE.completed = true;
+  const nota = Math.round(Math.min(10, Math.max(0, STATE.correct * POINTS_PER_QUESTION)) * 10)/10;
+
+  $('finalEmoji').textContent = completedAll ? '🏆' : '🏁';
+  $('finalTitle').textContent = completedAll ? '¡Aventura completada!' : 'Aventura terminada';
+  $('finalSub').textContent = completedAll
+    ? 'Venciste al jefe de los '+WORLDS.length+' mundos. Muy bien recorrido.'
+    : (reason || 'Terminaste la aventura antes de superar todos los mundos.');
+  $('finalGrade').textContent = nota.toFixed(1);
+  $('finCorrect').textContent = STATE.correct;
+  $('finTotal').textContent = TOTAL_QUESTIONS;
+  $('finWorlds').textContent = STATE.clearedWorlds.length;
+  $('reviewBox').hidden = true;
+  $('btnToggleReview').textContent = 'Ver revisión de respuestas';
+  buildReview();
+  showScreen('screen-victory');
+  saveProgress();
+  saveResult(nota);
+}
+
+function buildReview(){
+  const box = $('reviewBox');
+  if(!STATE.answered.length){
+    box.innerHTML = '<p style="color:#4A5C7C;font-weight:600;">No hay respuestas registradas.</p>';
+    return;
+  }
+  let html = '';
+  STATE.answered.forEach(function(a, i){
+    html += '<div class="review-item">'+
+      '<div class="rq"><span class="rq-n">Pregunta '+(i+1)+'</span>'+escapeHtml(a.q)+'</div>'+
+      '<div class="ra"><span class="tag yours">Tu respuesta: </span>'+escapeHtml(a.options[a.selectedIdx])+'</div>'+
+      '<div class="ra"><span class="tag right">Respuesta correcta: </span>'+escapeHtml(a.options[a.correctIdx])+'</div>'+
+      (a.subtopic ? '<div class="ra" style="color:#4A5C7C;">Tema: '+escapeHtml(a.subtopic)+'</div>' : '')+
+      (a.explanation ? '<div class="exp-block" style="margin-top:8px;"><span class="exp-head">Explicación</span>'+renderExplanation(a.explanation)+'</div>' : '')+
+      '</div>';
+  });
+  box.innerHTML = html;
+}
+
+function saveResult(nota){
+  const sbRow = {
+    student_name: STATE.studentName,
+    student_lastname: STATE.studentLastname,
+    course: STATE.course,
+    exam_id: EXAM_ID,
+    score: STATE.correct,
+    total: TOTAL_QUESTIONS,
+    grade: parseFloat(nota),
+    timestamp: new Date().toISOString(),
+    attempt: 1,
+    answers: {
+      completed: true,
+      coins: STATE.coins,
+      lives: STATE.lives,
+      worldsCleared: STATE.clearedWorlds.length,
+      perWorld: STATE.clearedWorlds,
+      items: STATE.answered.map(function(a){
+        return {
+          wi: a.wi,
+          world: (WORLDS[a.wi] && WORLDS[a.wi].code) || '',
+          phase: a.phase,
+          question: a.q,
+          options: a.options,
+          correct: a.correctIdx,
+          selected: a.selectedIdx,
+          ok: a.ok,
+          topic: a.subtopic,
+          difficulty: a.difficulty
+        };
+      })
+    }
+  };
+  const statusEl = $('saveStatus');
+  function saveLocalFallback(){
+    saveLocalRecord({
+      full: STATE.studentFullName, course: STATE.course,
+      completed: true, score: STATE.correct, total: TOTAL_QUESTIONS,
+      grade: nota, timestamp: sbRow.timestamp
+    });
+    statusEl.className = 'save-status warn';
+    statusEl.textContent = 'Sin conexión con el servidor. Tu resultado se guardó solo en este dispositivo. Avísale al docente.';
+  }
+  if(!SUPABASE_CONFIGURED){ saveLocalFallback(); return; }
+  supabaseSend('quiz_results', 'POST', sbRow, 'resolution=merge-duplicates,return=representation')
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      statusEl.className = 'save-status ok';
+      statusEl.textContent = 'Resultado guardado correctamente.';
+    })
+    .catch(saveLocalFallback);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   16. PANEL DOCENTE
+   ══════════════════════════════════════════════════════════════════════════ */
+let teacherAuthenticated = false;
+let currentTeacherRows = [];
+
+function openTeacherModal(){
+  $('modal-teacher').hidden = false;
+  $('modal-teacher').classList.add('open');
+  if(teacherAuthenticated){
+    $('teacherLogin').hidden = true;
+    $('teacherPanel').hidden = false;
+    loadTeacher();
+  } else {
+    $('teacherLogin').hidden = false;
+    $('teacherPanel').hidden = true;
+    $('teacherKeyError').classList.remove('show');
+  }
+}
+function closeTeacherModal(){
+  $('modal-teacher').classList.remove('open');
+  $('modal-teacher').hidden = true;
+}
+function validateTeacherKey(){
+  const key = $('teacherKeyInput').value.trim();
+  const err = $('teacherKeyError');
+  if(key !== TEACHER_KEY){
+    err.innerHTML = 'Clave incorrecta.';
+    err.classList.add('show');
+    return;
+  }
+  err.classList.remove('show');
+  teacherAuthenticated = true;
+  $('teacherLogin').hidden = true;
+  $('teacherPanel').hidden = false;
+  loadTeacher();
+}
+function loadTeacher(){
+  const wrap = $('teacherTableWrap');
+  if(!SUPABASE_CONFIGURED){
+    currentTeacherRows = [];
+    wrap.innerHTML = '<p style="color:#B3282D;text-align:center;padding:20px;">Supabase no está configurado. Revisa las credenciales.</p>';
+    return;
+  }
+  supabaseGetWithRetry('quiz_results?exam_id=eq.'+EXAM_ID+'&select=*&order=timestamp.desc', 2)
+    .then(function(rows){
+      currentTeacherRows = (rows||[]).filter(isCompletedRow);
+      renderTeacherTable(currentTeacherRows);
+    })
+    .catch(function(){
+      currentTeacherRows = [];
+      wrap.innerHTML = '<p style="color:#B3282D;text-align:center;padding:20px;">Error de conexión con el servidor. Verifica que el proyecto esté activo.</p>';
+    });
+}
+function renderTeacherTable(rows){
+  const wrap = $('teacherTableWrap');
+  $('teacherCount').textContent = rows.length ? rows.length+' registro(s)' : '';
+  if(!rows.length){
+    wrap.innerHTML = '<p style="color:#4A5C7C;text-align:center;padding:20px;">No hay notas guardadas todavía.</p>';
+    return;
+  }
+  let html = '<table><thead><tr>'+
+    '<th>Nombre</th><th>Apellido</th><th>Curso</th><th>Correctas</th><th>Total</th>'+
+    '<th>Nota /10</th><th>Fecha</th><th></th>'+
+    '</tr></thead><tbody>';
+  rows.forEach(function(r,idx){
+    const name = r.student_name||'';
+    const last = r.student_lastname||'';
+    const date = r.timestamp||r.created_at||'';
+    const dateStr = date ? new Date(date).toLocaleString('es-EC') : '-';
+    html += '<tr>'+
+      '<td>'+escapeHtml(name)+'</td>'+
+      '<td>'+escapeHtml(last)+'</td>'+
+      '<td>'+escapeHtml(r.course||'1BGU')+'</td>'+
+      '<td>'+(r.score||0)+'</td>'+
+      '<td>'+(r.total||0)+'</td>'+
+      '<td><strong>'+Number(r.grade||0).toFixed(1)+'</strong></td>'+
+      '<td>'+dateStr+'</td>'+
+      '<td style="white-space:nowrap;"><button class="btn btn-sm btn-danger" data-del="'+idx+'">Eliminar</button></td>'+
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('[data-del]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const idx = parseInt(this.getAttribute('data-del'), 10);
+      if(isNaN(idx)) return;
+      const row = currentTeacherRows[idx];
+      if(!row || !row.id) return;
+      armButton(this, function(){
+        supabaseSend('quiz_results?id=eq.'+row.id, 'DELETE')
+          .then(function(){ loadTeacher(); })
+          .catch(function(){ loadTeacher(); });
+      });
+    });
+  });
+}
+/* Confirmación por doble clic (nunca confirm(), que se bloquea en los iframes). */
+function armButton(btn, fn){
+  if(btn.dataset.armed === '1'){
+    btn.dataset.armed = '0';
+    btn.textContent = 'Eliminar';
+    fn();
+    return;
+  }
+  btn.dataset.armed = '1';
+  btn.textContent = '¿Confirmar?';
+  setTimeout(function(){
+    if(btn.dataset.armed === '1'){
+      btn.dataset.armed = '0';
+      btn.textContent = 'Eliminar';
+    }
+  }, 3000);
+}
+function clearAllGrades(){
+  const btn = $('btnClearAll');
+  armButton(btn, function(){
+    supabaseSend('quiz_results?exam_id=eq.'+EXAM_ID, 'DELETE')
+      .then(function(){ loadTeacher(); })
+      .catch(function(){ loadTeacher(); });
+  });
+}
+function exportExcel(){
+  if(!currentTeacherRows.length){
+    $('teacherCount').textContent = 'No hay notas para exportar.';
+    return;
+  }
+  const header = ['Nombre','Apellido','Curso','Correctas','Total','Nota /10','Fecha'];
+  const esc = function(v){ const s=String(v==null?'' : v); return /[",\n;]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const lines = [header.join(',')];
+  currentTeacherRows.forEach(function(r){
+    lines.push([
+      esc(r.student_name||''),
+      esc(r.student_lastname||''),
+      esc(r.course||'1BGU'),
+      r.score||0,
+      r.total||0,
+      Number(r.grade||0).toFixed(1),
+      esc(r.timestamp ? new Date(r.timestamp).toLocaleString('es-EC') : '')
+    ].join(','));
+  });
+  const csv = '\ufeff' + lines.join('\r\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mario_bros_calificaciones.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   17. EVENTOS
+   ══════════════════════════════════════════════════════════════════════════ */
+$('studentSelect').addEventListener('change', function(){
+  hideNameError();
+  const local = getLocalRecord(this.value.trim());
+  const box = $('resumeBox');
+  if(local && !local.completed && local.answered && local.answered.length){
+    box.hidden = false;
+    box.innerHTML = 'Tienes una aventura a medias en este dispositivo. Al comenzar, continúas en el mundo '+(local.worldIndex+1)+'.';
+  } else {
+    box.hidden = true;
+  }
+  $('btnStart').disabled = !this.value;
+});
+$('btnStart').addEventListener('click', onStartClick);
+$('btnEnterWorld').addEventListener('click', function(){
+  showScreen('screen-battle');
+  renderQuestion();
+});
+$('btnNextWorld').addEventListener('click', nextWorld);
+$('btnSeeGrade').addEventListener('click', function(){
+  if(this.dataset.action === 'retry'){
+    this.dataset.action = '';
+    retryWorld();
+  } else {
+    endGame(false, 'Terminaste la aventura.');
+  }
+});
+$('btnToggleReview').addEventListener('click', function(){
+  const box = $('reviewBox');
+  const show = box.hidden;
+  box.hidden = !show;
+  this.textContent = show ? 'Ocultar revisión de respuestas' : 'Ver revisión de respuestas';
+});
+$('rulesCheck').addEventListener('change', function(){ if(this.checked) acceptRules(); });
+$('btnAcceptRules').addEventListener('click', function(){
+  closeRulesModal();
+  launchGame(STATE.pendingName, STATE.pendingCourse);
+});
+$('btnCancelRules').addEventListener('click', closeRulesModal);
+$('btnCloseRules').addEventListener('click', closeRulesModal);
+$('teacherTrigger').addEventListener('click', openTeacherModal);
+$('btnCloseTeacher').addEventListener('click', closeTeacherModal);
+$('btnValidateKey').addEventListener('click', validateTeacherKey);
+$('teacherKeyInput').addEventListener('keydown', function(e){ if(e.key === 'Enter') validateTeacherKey(); });
+$('btnExport').addEventListener('click', exportExcel);
+$('btnClearAll').addEventListener('click', clearAllGrades);
+$('modal-teacher').addEventListener('click', function(e){ if(e.target === this) closeTeacherModal(); });
+$('modal-rules').addEventListener('click', function(e){ if(e.target === this) closeRulesModal(); });
+
+/* ══════════════════════════════════════════════════════════════════════════
+   18. INICIALIZACIÓN
+   ══════════════════════════════════════════════════════════════════════════ */
+(function init(){
+  buildRoster();
+  $('appTitle').textContent = BANK.title || 'Mario Bros';
+  $('appSubtitle').textContent = BANK.subtitle || 'Historia y Educación para la Ciudadanía · 1BGU';
+  $('appUnit').textContent = BANK.unit || 'Cinco mundos, cinco peleas, una sola nota';
+  $('btnStart').disabled = true;
+  renderHud();
+})();
+</script>
+</body>
+</html>
