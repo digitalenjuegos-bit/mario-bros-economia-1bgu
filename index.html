@@ -753,11 +753,11 @@
     <h2>Cómo jugar</h2>
     <ol>
       <li>Elige tu nombre de la lista y lee las reglas.</li>
-      <li>Viaja por los cinco mundos. Cada mundo tiene cinco preguntas.</li>
-      <li>En cada mundo peleas contra un enemigo y, al final, contra el jefe de ese mundo.</li>
-      <li>Cada respuesta correcta da una moneda y quita un corazón al rival.</li>
-      <li>Si el jefe no cae, repites el mundo con otras preguntas. Tienes <strong>3 intentos por mundo</strong>.</li>
-      <li>Si agotas los 3 intentos en un mundo, la partida termina y se guarda tu nota hasta ese momento.</li>
+      <li>Recorre los cuatro mundos. Cada mundo tiene cinco preguntas (20 en total).</li>
+      <li>En cada mundo te acompaña un enemigo que reacciona a tus respuestas.</li>
+      <li>Cada respuesta correcta da una moneda. Las incorrectas solo muestran la explicación.</li>
+      <li>No hay vidas ni game over: siempre avanzas a la siguiente pregunta.</li>
+      <li>Al completar las 20 preguntas, se calcula tu nota sobre 10.</li>
     </ol>
     <div class="note">Solo se permite un intento por estudiante. Al terminar, tu nota queda guardada y no puedes volver a jugar.</div>
   </div>
@@ -774,27 +774,7 @@
   <button class="btn btn-gold btn-block btn-wide" id="btnStart" disabled>Comenzar aventura</button>
 </section>
 
-<!-- ══════════ PRESENTACIÓN DEL MUNDO ══════════ -->
-<section id="screen-world" class="screen">
-  <div class="world-card">
-    <span class="world-badge" id="worldCode">Mundo 1-1</span>
-    <h2 id="worldName">Pradera del Alba</h2>
-    <p class="world-sub" id="worldSubtopic">Tema de este mundo</p>
-    <div class="world-foes">
-      <div class="foe-box">
-        <div class="foe-emoji" id="worldEnemyEmoji">🍄</div>
-        <div class="foe-name" id="worldEnemyName">Goomba</div>
-        <div class="foe-role">Enemigo del camino</div>
-      </div>
-      <div class="foe-box boss">
-        <div class="foe-emoji" id="worldBossEmoji">🐲</div>
-        <div class="foe-name" id="worldBossName">Jefe del mundo</div>
-        <div class="foe-role">Jefe del castillo</div>
-      </div>
-    </div>
-    <button class="btn btn-green btn-wide" id="btnEnterWorld">Entrar al mundo</button>
-  </div>
-</section>
+
 
 <!-- ══════════ BATALLA ══════════ -->
 <section id="screen-battle" class="screen">
@@ -836,33 +816,20 @@
   </div>
 </section>
 
-<!-- ══════════ FIN DE PARTIDA ══════════ -->
-<section id="screen-gameover" class="screen">
-  <div class="card result-box">
-    <div class="big-emoji" id="goEmoji">👑</div>
-    <h2 id="goTitle">El jefe no cayó</h2>
-    <p class="sub" id="goSub">Agotaste los 3 intentos en este mundo. La aventura termina aquí.</p>
-    <div class="stats-grid">
-      <div class="stat"><div class="num" id="goCorrect">0</div><div class="lbl">Aciertos</div></div>
-      <div class="stat"><div class="num" id="goTotal">25</div><div class="lbl">Preguntas</div></div>
-      <div class="stat"><div class="num" id="goWorlds">0</div><div class="lbl">Mundos superados</div></div>
-    </div>
-    <button class="btn btn-gold btn-wide" id="btnSeeGrade">Ver mi nota</button>
-  </div>
-</section>
+
 
 <!-- ══════════ VICTORIA FINAL ══════════ -->
 <section id="screen-victory" class="screen">
   <div class="card result-box">
     <div class="big-emoji" id="finalEmoji">🏆</div>
     <h2 id="finalTitle">¡Aventura completada!</h2>
-    <p class="sub" id="finalSub">Venciste a los cinco jefes de los cinco mundos.</p>
+    <p class="sub" id="finalSub">Completaste las 20 preguntas de los 4 mundos. ¡Muy bien!</p>
     <div class="grade-label">Tu nota</div>
     <div class="grade-big" id="finalGrade">0.0</div>
     <div class="stats-grid">
       <div class="stat"><div class="num" id="finCorrect">0</div><div class="lbl">Aciertos</div></div>
-      <div class="stat"><div class="num" id="finTotal">25</div><div class="lbl">Preguntas</div></div>
-      <div class="stat"><div class="num" id="finWorlds">5</div><div class="lbl">Mundos superados</div></div>
+      <div class="stat"><div class="num" id="finTotal">20</div><div class="lbl">Preguntas</div></div>
+      <div class="stat"><div class="num" id="finWorlds">4</div><div class="lbl">Mundos superados</div></div>
     </div>
     <div class="save-status" id="saveStatus"></div>
     <button class="btn btn-ghost btn-block" id="btnToggleReview">Ver revisión de respuestas</button>
@@ -877,11 +844,11 @@
     <h2>Reglas de la evaluación</h2>
     <div id="rulesBody" class="rules-locked">
       <ul>
-        <li>Esta evaluación tiene <strong id="rulesCount">25</strong> preguntas, repartidas en <strong id="rulesWorlds">5</strong> mundos.</li>
-        <li>En cada mundo peleas contra un enemigo y después contra el jefe de ese mundo.</li>
-        <li>Cada respuesta correcta da una moneda y quita un corazón al rival.</li>
-        <li>Si el jefe no cae, repites el mundo con preguntas nuevas. Tienes <strong>3 intentos por mundo</strong>.</li>
-        <li>Si agotas los 3 intentos en un mundo, la partida termina y se guarda tu nota hasta ese momento.</li>
+        <li>Esta evaluación tiene <strong id="rulesCount">20</strong> preguntas, repartidas en <strong id="rulesWorlds">4</strong> mundos.</li>
+        <li>En cada mundo te acompaña un enemigo que reacciona a tus respuestas.</li>
+        <li>Cada respuesta correcta da una moneda. Las incorrectas solo muestran la explicación.</li>
+        <li>No hay vidas ni game over: siempre avanzas a la siguiente pregunta.</li>
+        <li>Al completar las 20 preguntas, se calcula tu nota sobre 10.</li>
         <li><strong>Solo hay un intento.</strong> Cuando termines, tu nota queda guardada y no puedes volver a jugar.</li>
       </ul>
     </div>
@@ -1064,20 +1031,19 @@ const SUPABASE_CONFIGURED = SUPABASE_URL.indexOf('tu-proyecto') === -1 && SUPABA
 const TEACHER_KEY = 'DOCENTE2026';
 const LS_KEY = 'mario_bros_historia_1bgu_v1';
 const LETTERS = ['A','B','C','D'];
-const MAX_WORLD_ATTEMPTS = 3; /* intentos permitidos por mundo */
-const MAX_WORLD_RETRIES = 3;
-const DEFAULT_POINTS = 0.4; /* 25 preguntas, nota sobre 10 */
+const DEFAULT_POINTS = 0.5; /* 20 preguntas, nota sobre 10 */
 
 /* Nuevas constantes para mejoras de UX */
-const STREAK_MILESTONES = [3, 5, 8, 10, 15, 20, 25];
+const STREAK_MILESTONES = [3, 5, 8, 10, 12, 15, 18, 20];
 const MILESTONE_MESSAGES = {
   3: { emoji: '⭐', text: '¡RACHA DE 3!', sub: 'Bien empezado' },
   5: { emoji: '🔥', text: '¡RACHA DE 5!', sub: '¡Imparable!' },
   8: { emoji: '⚡', text: '¡RACHA DE 8!', sub: 'En llamas' },
   10: { emoji: '💎', text: '¡RACHA DE 10!', sub: 'Nivel experto' },
+  12: { emoji: '🌟', text: '¡RACHA DE 12!', sub: '¡Más de la mitad!' },
   15: { emoji: '🌟', text: '¡RACHA DE 15!', sub: '¡Leyenda viva!' },
-  20: { emoji: '👑', text: '¡RACHA DE 20!', sub: 'Reino Champiñón' },
-  25: { emoji: '🏆', text: '¡PERFECTO!', sub: '25/25 - Maestro' }
+  18: { emoji: '👑', text: '¡RACHA DE 18!', sub: '¡Casi perfecto!' },
+  20: { emoji: '🏆', text: '¡PERFECTO!', sub: '20/20 - Maestro' }
 };
 const KONAMI_CODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 const HINT_COST = 2; /* monedas para usar pista */
@@ -1106,11 +1072,8 @@ const ENEMY_DEFAULTS = [
   { enemy:'Goomba', emoji:'🍄' },
   { enemy:'Koopa', emoji:'🐢' },
   { enemy:'Cheep Cheep', emoji:'🐟' },
-  { enemy:'Piranha Plant', emoji:'🌵' },
-  { enemy:'Bowser', emoji:'🐲' }
+  { enemy:'Piranha Plant', emoji:'🌵' }
 ];
-const BOSS_NAME = 'Rey Bowser';
-const BOSS_EMOJI = '🐲';
 
 /* ══════════════════════════════════════════════════════════════════════════
    3. SUPABASE
@@ -1333,17 +1296,11 @@ document.addEventListener('keydown', checkKonami);
 const STATE = {
   studentFullName:'', studentName:'', studentLastname:'', course:'',
   worldIndex:0,
-  phase:'enemy',          /* 'enemy' | 'boss' */
-  phaseIndex:0,
-  questions:[],           /* preguntas barajadas del mundo en curso */
-  shuffled:[],            /* {options, answerIdx} por pregunta del mundo en curso */
-  enemyCount:1, bossCount:1,
+  questionIndex:0,        /* índice global 0-19 */
+  questions:[],           /* todas las 20 preguntas barajadas por mundo */
+  shuffled:[],            /* {options, answerIdx} por cada pregunta */
   correct:0, coins:0,
-  worldCorrect:0,
-  worldAttempts:0,        /* intentos usados en el mundo actual (máx MAX_WORLD_ATTEMPTS) */
-  retriesLeft:MAX_WORLD_RETRIES,
-  answered:[],            /* respuestas aceptadas (se descartan al repetir el mundo) */
-  clearedWorlds:[],       /* [{code, name, correct, total}] */
+  answered:[],            /* respuestas aceptadas */
   completed:false, partidaTerminada:false, starting:false
 };
 
@@ -1519,12 +1476,10 @@ function saveProgress(){
     full: STATE.studentFullName,
     course: STATE.course,
     worldIndex: STATE.worldIndex,
-    retriesLeft: STATE.retriesLeft,
-    worldAttempts: STATE.worldAttempts,
+    questionIndex: STATE.questionIndex,
     correct: STATE.correct,
     coins: STATE.coins,
     answered: STATE.answered,
-    clearedWorlds: STATE.clearedWorlds,
     completed: STATE.completed,
     score: STATE.correct,
     total: TOTAL_QUESTIONS,
@@ -1660,35 +1615,30 @@ function launchGame(fullName, course){
   STATE.studentName = parsed.name;
   STATE.course = course || selectedCourse();
   STATE.worldIndex = 0;
+  STATE.questionIndex = 0;
   STATE.correct = 0;
   STATE.coins = 0;
-  STATE.worldAttempts = 0;
   STATE.answered = [];
-  STATE.clearedWorlds = [];
   STATE.completed = false;
   STATE.partidaTerminada = false;
-  STATE.retriesLeft = MAX_WORLD_RETRIES;
 
   const local = getLocalRecord(fullName);
   if(local && !local.completed && local.answered && local.answered.length){
-    /* Continúa la partida: se conservan los mundos ya superados y se reinicia
-       el mundo en curso con preguntas nuevas. */
-    STATE.worldIndex = Math.min(local.worldIndex || 0, WORLDS.length-1);
-    STATE.retriesLeft = local.retriesLeft != null ? local.retriesLeft : MAX_WORLD_RETRIES;
-    STATE.worldAttempts = local.worldAttempts != null ? local.worldAttempts : 0;
-    STATE.answered = (local.answered||[]).filter(function(a){ return a.wi < STATE.worldIndex; });
+    /* Continúa la partida: se conservan las respuestas ya dadas. */
+    STATE.questionIndex = Math.min(local.questionIndex || 0, TOTAL_QUESTIONS-1);
+    STATE.answered = local.answered || [];
     STATE.correct = STATE.answered.filter(function(a){ return a.ok; }).length;
     STATE.coins = STATE.correct;
-    STATE.clearedWorlds = local.clearedWorlds || [];
-    prepareWorld();
+    STATE.worldIndex = Math.floor(STATE.questionIndex / 5);
+    prepareAllQuestions();
     showScreen('screen-battle');
     renderQuestion();
-    showToast('Continúas tu aventura en el mundo '+worldCode(WORLDS[STATE.worldIndex], STATE.worldIndex)+'.');
+    showToast('Continúas tu aventura en la pregunta '+(STATE.questionIndex+1)+' de '+TOTAL_QUESTIONS+'.');
     return;
   }
-  prepareWorld();
-  showScreen('screen-world');
-  renderWorldIntro();
+  prepareAllQuestions();
+  showScreen('screen-battle');
+  renderQuestion();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1825,7 +1775,7 @@ function renderExplanation(text){
 
 function handleAnswer(selectedIdx){
   if(STATE.partidaTerminada) return;
-  const idx = currentQuestionIndex();
+  const idx = STATE.questionIndex;
   const q = STATE.questions[idx];
   const sh = STATE.shuffled[idx];
   const correctIdx = sh.answerIdx;
@@ -1840,8 +1790,8 @@ function handleAnswer(selectedIdx){
   }
 
   STATE.answered.push({
+    qi: idx,
     wi: STATE.worldIndex,
-    phase: STATE.phase,
     q: q.q,
     options: sh.options,
     correctIdx: correctIdx,
@@ -1856,9 +1806,8 @@ function handleAnswer(selectedIdx){
   if(isCorrect){
     STATE.correct++;
     STATE.coins++;
-    STATE.worldCorrect++;
     fb.className = 'feedback show ok';
-    fb.innerHTML = '<span class="fb-title">¡Correcto! Ganaste una moneda y le quitaste un corazón al rival.</span>'+
+    fb.innerHTML = '<span class="fb-title">¡Correcto! Ganaste una moneda.</span>'+
       '<div class="exp-block"><span class="exp-head">Explicación</span>'+renderExplanation(q.explanation)+'</div>';
     const foeEl = $('stageFoe');
     foeEl.classList.add('hit');
@@ -1900,28 +1849,21 @@ function handleAnswer(selectedIdx){
    ══════════════════════════════════════════════════════════════════════════ */
 function advance(){
   if(STATE.partidaTerminada) return;
-
-  if(STATE.phase === 'enemy'){
-    STATE.phaseIndex++;
-    if(STATE.phaseIndex >= STATE.enemyCount){
-      STATE.phase = 'boss';
-      STATE.phaseIndex = 0;
-    }
-    renderQuestion();
+  STATE.questionIndex++;
+  if(STATE.questionIndex >= TOTAL_QUESTIONS){
+    endGame(true, '');
     return;
   }
-  /* fase del jefe */
-  STATE.phaseIndex++;
-  if(STATE.phaseIndex < STATE.bossCount){
-    renderQuestion();
-    return;
-  }
-  /* terminó la pelea contra el jefe */
-  const bossDefeated = foeHeartsLeft() <= 0;
-  if(bossDefeated){
-    worldCleared();
+  /* Cambio de mundo cada 5 preguntas */
+  const newWorldIndex = Math.floor(STATE.questionIndex / 5);
+  if(newWorldIndex !== STATE.worldIndex && newWorldIndex < WORLDS.length){
+    const oldWorld = STATE.worldIndex;
+    STATE.worldIndex = newWorldIndex;
+    showWorldTransition(newWorldIndex, function(){
+      renderQuestion();
+    });
   } else {
-    bossSurvived();
+    renderQuestion();
   }
 }
 
@@ -2020,9 +1962,10 @@ function buildReview(){
     return;
   }
   let html = '';
-  STATE.answered.forEach(function(a, i){
+  STATE.answered.forEach(function(a){
+    const qNum = a.qi + 1;
     html += '<div class="review-item">'+
-      '<div class="rq"><span class="rq-n">Pregunta '+(i+1)+'</span>'+escapeHtml(a.q)+'</div>'+
+      '<div class="rq"><span class="rq-n">Pregunta '+qNum+'</span>'+escapeHtml(a.q)+'</div>'+
       '<div class="ra"><span class="tag yours">Tu respuesta: </span>'+escapeHtml(a.options[a.selectedIdx])+'</div>'+
       '<div class="ra"><span class="tag right">Respuesta correcta: </span>'+escapeHtml(a.options[a.correctIdx])+'</div>'+
       (a.subtopic ? '<div class="ra" style="color:#4A5C7C;">Tema: '+escapeHtml(a.subtopic)+'</div>' : '')+
@@ -2046,14 +1989,11 @@ function saveResult(nota){
     answers: {
       completed: true,
       coins: STATE.coins,
-      worldAttempts: STATE.worldAttempts,
-      worldsCleared: STATE.clearedWorlds.length,
-      perWorld: STATE.clearedWorlds,
       items: STATE.answered.map(function(a){
         return {
+          qi: a.qi,
           wi: a.wi,
           world: (WORLDS[a.wi] && WORLDS[a.wi].code) || '',
-          phase: a.phase,
           question: a.q,
           options: a.options,
           correct: a.correctIdx,
@@ -2252,19 +2192,7 @@ $('studentSelect').addEventListener('change', function(){
   $('btnStart').disabled = !this.value;
 });
 $('btnStart').addEventListener('click', onStartClick);
-$('btnEnterWorld').addEventListener('click', function(){
-  showScreen('screen-battle');
-  renderQuestion();
-});
-$('btnNextWorld').addEventListener('click', nextWorld);
-$('btnSeeGrade').addEventListener('click', function(){
-  if(this.dataset.action === 'retry'){
-    this.dataset.action = '';
-    retryWorld();
-  } else {
-    endGame(false, 'Terminaste la aventura.');
-  }
-});
+// btnEnterWorld, btnNextWorld, btnSeeGrade removed (screens no longer exist)
 $('btnToggleReview').addEventListener('click', function(){
   const box = $('reviewBox');
   const show = box.hidden;
