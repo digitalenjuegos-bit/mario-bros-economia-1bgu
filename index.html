@@ -80,6 +80,73 @@
   .pip.done{ background:#1E7B4F; color:#DFF6E8; border-color:#2F9E63; }
   .pip.current{ background:var(--gold); color:#3A2A00; border-color:#FFF0A8; }
 
+  /* ══════════ MARIO SKY PATH ══════════ */
+  .mario-path{
+    max-width:880px; margin:8px auto 0;
+    display:flex; gap:4px; flex-wrap:wrap; justify-content:center;
+    padding:8px 12px;
+    background:linear-gradient(180deg, rgba(135,206,235,.15) 0%, rgba(135,206,235,.05) 100%);
+    border:2px dashed rgba(135,206,235,.4);
+    border-radius:12px;
+    position:relative;
+  }
+  .mario-path::before{
+    content:'☁️'; position:absolute; top:-12px; left:12px;
+    font-size:1.2rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  }
+  .mario-path::after{
+    content:'🏁'; position:absolute; top:-12px; right:12px;
+    font-size:1.2rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  }
+  .sky-tile{
+    width:28px; height:28px; min-width:28px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.12);
+    border:2px solid rgba(135,206,235,.5);
+    border-radius:6px;
+    font-size:1rem;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    position:relative;
+  }
+  .sky-tile.done{
+    background:rgba(30,123,79,.6);
+    border-color:#2F9E63;
+    color:#DFF6E8;
+  }
+  .sky-tile.current{
+    background:var(--gold);
+    border-color:#FFF0A8;
+    color:#3A2A00;
+    transform:scale(1.15);
+    box-shadow:0 0 12px rgba(252,224,68,.6);
+  }
+  .sky-tile.locked{
+    background:rgba(255,255,255,.05);
+    border-color:rgba(255,255,255,.1);
+    color:transparent;
+  }
+  .sky-tile .mario{
+    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    font-size:1.4rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));
+    animation:jump .6s cubic-bezier(.34,1.56,.64,1);
+    pointer-events:none;
+    z-index:10;
+  }
+  @keyframes jump{
+    0%{ transform:translateX(-50%) translateY(0) rotate(0deg); opacity:1; }
+    30%{ transform:translateX(-50%) translateY(-28px) rotate(-10deg); opacity:1; }
+    60%{ transform:translateX(-50%) translateY(-18px) rotate(5deg); opacity:1; }
+    100%{ transform:translateX(-50%) translateY(0) rotate(0deg); opacity:1; }
+  }
+  .sky-tile .flag{
+    position:absolute; top:-18px; right:-4px;
+    font-size:.85rem; opacity:0; animation:flagIn .4s .3s forwards;
+  }
+  @keyframes flagIn{
+    0%{ transform:scale(0) rotate(-90deg); opacity:0; }
+    100%{ transform:scale(1) rotate(0deg); opacity:1; }
+  }
+
   /* ══════════ BANNER ══════════ */
   .banner{
     text-align:center; position:relative;
@@ -436,8 +503,10 @@
     <div class="hud-item"><span class="hud-ico">❤️</span><span class="hud-val" id="hudLives">3</span><span class="hud-lbl">Vidas</span></div>
     <div class="hud-item"><span class="hud-ico">🏆</span><span class="hud-val" id="hudScore">0</span><span class="hud-lbl">Aciertos</span></div>
     <div class="hud-item"><span class="hud-ico">🌎</span><span class="hud-val" id="hudWorld">1-1</span><span class="hud-lbl">Mundo</span></div>
-    <div class="hud-map" id="hudMap"></div>
+<div class="hud-map" id="hudMap"></div>
   </div>
+  <!-- Mario Sky Path - progreso visual por pregunta -->
+  <div class="mario-path" id="marioPath" aria-label="Progreso de Mario" role="img"></div>
 </div>
 
 <!-- ══════════ PANTALLA DE INICIO ══════════ -->
@@ -1013,6 +1082,27 @@ function renderHud(){
     d.textContent = worldCode(ww, i);
     map.appendChild(d);
   });
+  renderMarioPath();
+}
+function renderMarioPath(){
+  const path = $('marioPath');
+  if(!path) return;
+  path.innerHTML = '';
+  for(let i=0;i<TOTAL_QUESTIONS;i++){
+    const tile = document.createElement('div');
+    if(i < STATE.correct){
+      tile.className = 'sky-tile done';
+      tile.innerHTML = '✅<span class="flag">🚩</span>';
+    }else if(i === STATE.correct){
+      tile.className = 'sky-tile current';
+      tile.innerHTML = '<span class="mario">🏃‍♂️</span>';
+    }else{
+      tile.className = 'sky-tile locked';
+      tile.textContent = (i+1);
+    }
+    tile.title = 'Pregunta ' + (i+1) + ' de ' + TOTAL_QUESTIONS;
+    path.appendChild(tile);
+  }
 }
 function renderHearts(el, total, left){
   el.innerHTML = '';
