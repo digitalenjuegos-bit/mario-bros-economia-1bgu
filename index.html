@@ -125,25 +125,14 @@
     border-color:rgba(255,255,255,.1);
     color:transparent;
   }
-  .sky-tile .mario{
-    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
-    font-size:1.4rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));
-    animation:jump .6s cubic-bezier(.34,1.56,.64,1);
-    pointer-events:none;
-    z-index:10;
-  }
-  @keyframes jump{
-    0%{ transform:translateX(-50%) translateY(0) rotate(0deg); opacity:1; }
+  
+  
     30%{ transform:translateX(-50%) translateY(-28px) rotate(-10deg); opacity:1; }
     60%{ transform:translateX(-50%) translateY(-18px) rotate(5deg); opacity:1; }
     100%{ transform:translateX(-50%) translateY(0) rotate(0deg); opacity:1; }
   }
-  .sky-tile .flag{
-    position:absolute; top:-18px; right:-4px;
-    font-size:.85rem; opacity:0; animation:flagIn .4s .3s forwards;
-  }
-  @keyframes flagIn{
-    0%{ transform:scale(0) rotate(-90deg); opacity:0; }
+  
+  
     100%{ transform:scale(1) rotate(0deg); opacity:1; }
   }
 
@@ -500,7 +489,6 @@
 <div id="hud" aria-live="polite">
   <div class="hud-inner">
     <div class="hud-item"><span class="hud-ico">🪙</span><span class="hud-val" id="hudCoins">0</span><span class="hud-lbl">Monedas</span></div>
-    <div class="hud-item"><span class="hud-ico">❤️</span><span class="hud-val" id="hudLives">3</span><span class="hud-lbl">Vidas</span></div>
     <div class="hud-item"><span class="hud-ico">🏆</span><span class="hud-val" id="hudScore">0</span><span class="hud-lbl">Aciertos</span></div>
     <div class="hud-item"><span class="hud-ico">🌎</span><span class="hud-val" id="hudWorld">1-1</span><span class="hud-lbl">Mundo</span></div>
 <div class="hud-map" id="hudMap"></div>
@@ -637,7 +625,6 @@
     <div class="stats-grid">
       <div class="stat"><div class="num" id="wcCorrect">0</div><div class="lbl">Aciertos del mundo</div></div>
       <div class="stat"><div class="num" id="wcTotal">5</div><div class="lbl">Preguntas del mundo</div></div>
-      <div class="stat"><div class="num" id="wcLives">3</div><div class="lbl">Vidas</div></div>
     </div>
     <button class="btn btn-gold btn-wide" id="btnNextWorld">Siguiente mundo</button>
   </div>
@@ -1070,7 +1057,6 @@ function worldEnemy(w, idx){
 }
 function renderHud(){
   $('hudCoins').textContent = STATE.coins;
-  $('hudLives').textContent = STATE.lives;
   $('hudScore').textContent = STATE.correct + '/' + TOTAL_QUESTIONS;
   const w = WORLDS[STATE.worldIndex];
   $('hudWorld').textContent = w ? worldCode(w, STATE.worldIndex) : '-';
@@ -1095,7 +1081,7 @@ function renderMarioPath(){
       tile.innerHTML = '✅<span class="flag">🚩</span>';
     }else if(i === STATE.correct){
       tile.className = 'sky-tile current';
-      tile.innerHTML = '<span class="mario">🏃‍♂️</span>';
+      tile.innerHTML = '⭐';
     }else{
       tile.className = 'sky-tile locked';
       tile.textContent = (i+1);
@@ -1104,19 +1090,7 @@ function renderMarioPath(){
     path.appendChild(tile);
   }
 }
-function renderHearts(el, total, left){
-  el.innerHTML = '';
-  for(let i=0;i<total;i++){
-    const s = document.createElement('span');
-    s.textContent = '❤️';
-    if(i >= left) s.className = 'off';
-    el.appendChild(s);
-  }
-}
 
-/* ══════════════════════════════════════════════════════════════════════════
-   8. ROSTER EN EL LISTBOX
-   ══════════════════════════════════════════════════════════════════════════ */
 function buildRoster(){
   const sel = $('studentSelect');
   Object.keys(ROSTER).forEach(function(curso){
@@ -1482,7 +1456,7 @@ function handleAnswer(selectedIdx){
   } else {
     STATE.lives = Math.max(0, STATE.lives - 1);
     fb.className = 'feedback show bad';
-    fb.innerHTML = '<span class="fb-title">Incorrecto. Te quitaste una vida. Vidas restantes: '+STATE.lives+'.</span>'+
+    fb.innerHTML = '<span class="fb-title">Incorrecto. '+STATE.lives+'.</span>'+
       '<div class="exp-block"><span class="exp-head">Explicación</span>'+renderExplanation(q.explanation)+'</div>';
   }
   renderHearts($('foeHearts'), currentFoe().hearts, foeHeartsLeft());
