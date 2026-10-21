@@ -759,9 +759,8 @@
       <li>Viaja por los cinco mundos. Cada mundo tiene cinco preguntas.</li>
       <li>En cada mundo peleas contra un enemigo y, al final, contra el jefe de ese mundo.</li>
       <li>Cada respuesta correcta da una moneda y quita un corazón al rival.</li>
-      <li>Cada respuesta equivocada te quita una vida. Empiezas cada mundo con tres vidas.</li>
-      <li>Si el jefe no cae, repites el mundo con otras preguntas. Tienes tres intentos por mundo.</li>
-      <li>Si te quedas sin vidas, la partida termina y se guarda la nota que tengas en ese momento.</li>
+      <li>Si el jefe no cae, repites el mundo con otras preguntas. Tienes <strong>3 intentos por mundo</strong>.</li>
+      <li>Si agotas los 3 intentos en un mundo, la partida termina y se guarda tu nota hasta ese momento.</li>
     </ol>
     <div class="note">Solo se permite un intento por estudiante. Al terminar, tu nota queda guardada y no puedes volver a jugar.</div>
   </div>
@@ -789,13 +788,11 @@
         <div class="foe-emoji" id="worldEnemyEmoji">🍄</div>
         <div class="foe-name" id="worldEnemyName">Goomba</div>
         <div class="foe-role">Enemigo del camino</div>
-        <div class="hearts" id="worldEnemyHearts"></div>
       </div>
       <div class="foe-box boss">
         <div class="foe-emoji" id="worldBossEmoji">🐲</div>
         <div class="foe-name" id="worldBossName">Jefe del mundo</div>
         <div class="foe-role">Jefe del castillo</div>
-        <div class="hearts" id="worldBossHearts"></div>
       </div>
     </div>
     <button class="btn btn-green btn-wide" id="btnEnterWorld">Entrar al mundo</button>
@@ -846,9 +843,9 @@
 <!-- ══════════ FIN DE PARTIDA ══════════ -->
 <section id="screen-gameover" class="screen">
   <div class="card result-box">
-    <div class="big-emoji" id="goEmoji">💀</div>
-    <h2 id="goTitle">Te quedaste sin vidas</h2>
-    <p class="sub" id="goSub">La aventura termina aquí.</p>
+    <div class="big-emoji" id="goEmoji">👑</div>
+    <h2 id="goTitle">El jefe no cayó</h2>
+    <p class="sub" id="goSub">Agotaste los 3 intentos en este mundo. La aventura termina aquí.</p>
     <div class="stats-grid">
       <div class="stat"><div class="num" id="goCorrect">0</div><div class="lbl">Aciertos</div></div>
       <div class="stat"><div class="num" id="goTotal">25</div><div class="lbl">Preguntas</div></div>
@@ -886,9 +883,9 @@
       <ul>
         <li>Esta evaluación tiene <strong id="rulesCount">25</strong> preguntas, repartidas en <strong id="rulesWorlds">5</strong> mundos.</li>
         <li>En cada mundo peleas contra un enemigo y después contra el jefe de ese mundo.</li>
-        <li>Cada respuesta correcta da una moneda y quita un corazón al rival. Cada respuesta equivocada te quita una vida.</li>
-        <li>Empiezas cada mundo con tres vidas. Si te quedas sin vidas, la partida termina.</li>
-        <li>Si el jefe no cae, repites el mundo con preguntas nuevas. Tienes tres intentos por mundo.</li>
+        <li>Cada respuesta correcta da una moneda y quita un corazón al rival.</li>
+        <li>Si el jefe no cae, repites el mundo con preguntas nuevas. Tienes <strong>3 intentos por mundo</strong>.</li>
+        <li>Si agotas los 3 intentos en un mundo, la partida termina y se guarda tu nota hasta ese momento.</li>
         <li><strong>Solo hay un intento.</strong> Cuando termines, tu nota queda guardada y no puedes volver a jugar.</li>
       </ul>
     </div>
@@ -1071,7 +1068,7 @@ const SUPABASE_CONFIGURED = SUPABASE_URL.indexOf('tu-proyecto') === -1 && SUPABA
 const TEACHER_KEY = 'DOCENTE2026';
 const LS_KEY = 'mario_bros_historia_1bgu_v1';
 const LETTERS = ['A','B','C','D'];
-const START_LIVES = 3;
+const MAX_WORLD_ATTEMPTS = 3; /* intentos permitidos por mundo */
 const MAX_WORLD_RETRIES = 3;
 const DEFAULT_POINTS = 0.4; /* 25 preguntas, nota sobre 10 */
 
@@ -1345,8 +1342,9 @@ const STATE = {
   questions:[],           /* preguntas barajadas del mundo en curso */
   shuffled:[],            /* {options, answerIdx} por pregunta del mundo en curso */
   enemyCount:1, bossCount:1,
-  correct:0, coins:0, lives:START_LIVES,
+  correct:0, coins:0,
   worldCorrect:0,
+  worldAttempts:0,        /* intentos usados en el mundo actual (máx MAX_WORLD_ATTEMPTS) */
   retriesLeft:MAX_WORLD_RETRIES,
   answered:[],            /* respuestas aceptadas (se descartan al repetir el mundo) */
   clearedWorlds:[],       /* [{code, name, correct, total}] */
@@ -1526,9 +1524,9 @@ function saveProgress(){
     course: STATE.course,
     worldIndex: STATE.worldIndex,
     retriesLeft: STATE.retriesLeft,
+    worldAttempts: STATE.worldAttempts,
     correct: STATE.correct,
     coins: STATE.coins,
-    lives: STATE.lives,
     answered: STATE.answered,
     clearedWorlds: STATE.clearedWorlds,
     completed: STATE.completed,
@@ -1668,7 +1666,7 @@ function launchGame(fullName, course){
   STATE.worldIndex = 0;
   STATE.correct = 0;
   STATE.coins = 0;
-  STATE.lives = START_LIVES;
+  STATE.worldAttempts = 0;
   STATE.answered = [];
   STATE.clearedWorlds = [];
   STATE.completed = false;
@@ -1681,6 +1679,7 @@ function launchGame(fullName, course){
        el mundo en curso con preguntas nuevas. */
     STATE.worldIndex = Math.min(local.worldIndex || 0, WORLDS.length-1);
     STATE.retriesLeft = local.retriesLeft != null ? local.retriesLeft : MAX_WORLD_RETRIES;
+    STATE.worldAttempts = local.worldAttempts != null ? local.worldAttempts : 0;
     STATE.answered = (local.answered||[]).filter(function(a){ return a.wi < STATE.worldIndex; });
     STATE.correct = STATE.answered.filter(function(a){ return a.ok; }).length;
     STATE.coins = STATE.correct;
@@ -1715,7 +1714,7 @@ function prepareWorld(){
   STATE.phase = 'enemy';
   STATE.phaseIndex = 0;
   STATE.worldCorrect = 0;
-  STATE.lives = START_LIVES;
+  STATE.worldAttempts++;
   renderHud();
 }
 function renderWorldIntro(){
@@ -1728,8 +1727,6 @@ function renderWorldIntro(){
   $('worldEnemyName').textContent = foe.name;
   $('worldBossEmoji').textContent = BOSS_EMOJI;
   $('worldBossName').textContent = BOSS_NAME;
-  renderHearts($('worldEnemyHearts'), STATE.enemyCount, STATE.enemyCount);
-  renderHearts($('worldBossHearts'), STATE.bossCount, STATE.bossCount);
   renderHud();
 }
 
@@ -1878,15 +1875,13 @@ function handleAnswer(selectedIdx){
     checkStreakMilestones();
     showStreakBadge(STATE.correct);
   } else {
-    STATE.lives = Math.max(0, STATE.lives - 1);
     fb.className = 'feedback show bad';
-    fb.innerHTML = '<span class="fb-title">Incorrecto. '+STATE.lives+'.</span>'+
+    fb.innerHTML = '<span class="fb-title">Incorrecto. Sigue intentándolo.</span>'+
       '<div class="exp-block"><span class="exp-head">Explicación</span>'+renderExplanation(q.explanation)+'</div>';
     const foeRect = $('stageFoe').getBoundingClientRect();
     spawnParticles(foeRect.left + foeRect.width/2, foeRect.top + foeRect.height/2, ['💥','💨','😵','💫'], 8);
     screenFlash('rgba(179,40,45,0.25)');
   }
-  renderHearts($('foeHearts'), currentFoe().hearts, foeHeartsLeft());
   renderHud();
   saveProgress();
 
@@ -1904,7 +1899,6 @@ function handleAnswer(selectedIdx){
    ══════════════════════════════════════════════════════════════════════════ */
 function advance(){
   if(STATE.partidaTerminada) return;
-  if(STATE.lives <= 0){ endGame(false, 'Te quedaste sin vidas.'); return; }
 
   if(STATE.phase === 'enemy'){
     STATE.phaseIndex++;
@@ -1938,16 +1932,11 @@ function worldCleared(){
     correct: STATE.worldCorrect,
     total: STATE.enemyCount + STATE.bossCount
   });
-  const livesBefore = STATE.lives;
-  STATE.lives = Math.min(START_LIVES, STATE.lives + 1);
-  const lifeGained = STATE.lives > livesBefore;
   saveProgress();
   $('wcTitle').textContent = '¡Mundo '+worldCode(world, STATE.worldIndex)+' superado!';
-  $('wcSub').textContent = 'Derrotaste a '+currentFoe().name+' y al '+BOSS_NAME+'.'+
-    (lifeGained ? ' Recuperaste una vida.' : ' Vides con '+STATE.lives+' vidas para el siguiente mundo.');
+  $('wcSub').textContent = 'Derrotaste a '+currentFoe().name+' y al '+BOSS_NAME+'. ¡Prepárate para el siguiente mundo!';
   $('wcCorrect').textContent = STATE.worldCorrect;
   $('wcTotal').textContent = STATE.enemyCount + STATE.bossCount;
-  $('wcLives').textContent = STATE.lives;
   renderHud();
   showScreen('screen-world-clear');
   showMilestoneToast(STATE.clearedWorlds.length * 5); // 5, 10, 15, 20, 25
@@ -1955,13 +1944,13 @@ function worldCleared(){
 
 function bossSurvived(){
   const world = WORLDS[STATE.worldIndex];
-  if(STATE.retriesLeft <= 0){
-    endGame(false, 'El '+BOSS_NAME+' de este mundo no cayó y se agotaron tus intentos.');
+  if(STATE.worldAttempts >= MAX_WORLD_ATTEMPTS){
+    endGame(false, 'El '+BOSS_NAME+' de este mundo no cayó y se agotaron los '+MAX_WORLD_ATTEMPTS+' intentos permitidos.');
     return;
   }
   $('goEmoji').textContent = '👑';
   $('goTitle').textContent = 'El jefe no cayó';
-  $('goSub').textContent = 'El '+BOSS_NAME+' de '+worldCode(world, STATE.worldIndex)+' sigue en pie. Puedes repetir el mundo con otras preguntas. Te quedan '+(STATE.retriesLeft-1)+' intento(s) de repetición.';
+  $('goSub').textContent = 'El '+BOSS_NAME+' de '+worldCode(world, STATE.worldIndex)+' sigue en pie. Puedes repetir el mundo con otras preguntas. Te quedan '+(MAX_WORLD_ATTEMPTS - STATE.worldAttempts)+' intento(s).';
   $('goCorrect').textContent = STATE.correct;
   $('goTotal').textContent = TOTAL_QUESTIONS;
   $('goWorlds').textContent = STATE.clearedWorlds.length;
@@ -1972,20 +1961,14 @@ function bossSurvived(){
 }
 
 function retryWorld(){
-  STATE.retriesLeft--;
-  if(STATE.retriesLeft <= 0){
-    endGame(false, 'Se agotaron los intentos de repetición en este mundo.');
-    return;
-  }
   /* Se descartan las respuestas del mundo fallido: no cuentan para la nota. */
   STATE.answered = STATE.answered.filter(function(a){ return a.wi !== STATE.worldIndex; });
   STATE.correct = STATE.answered.filter(function(a){ return a.ok; }).length;
   STATE.coins = STATE.correct;
-  STATE.lives = START_LIVES;
   prepareWorld();
   showScreen('screen-battle');
   renderQuestion();
-  showToast('Repites el mundo '+worldCode(WORLDS[STATE.worldIndex], STATE.worldIndex)+' con preguntas nuevas.');
+  showToast('Repites el mundo '+worldCode(WORLDS[STATE.worldIndex], STATE.worldIndex)+' con preguntas nuevas. Intento '+STATE.worldAttempts+' de '+MAX_WORLD_ATTEMPTS+'.');
 }
 
 function nextWorld(){
@@ -1993,7 +1976,7 @@ function nextWorld(){
     const nextIndex = STATE.worldIndex + 1;
     showWorldTransition(nextIndex, function(){
       STATE.worldIndex = nextIndex;
-      STATE.retriesLeft = MAX_WORLD_RETRIES;
+      STATE.worldAttempts = 0;
       prepareWorld();
       showScreen('screen-world');
       renderWorldIntro();
@@ -2062,7 +2045,7 @@ function saveResult(nota){
     answers: {
       completed: true,
       coins: STATE.coins,
-      lives: STATE.lives,
+      worldAttempts: STATE.worldAttempts,
       worldsCleared: STATE.clearedWorlds.length,
       perWorld: STATE.clearedWorlds,
       items: STATE.answered.map(function(a){
