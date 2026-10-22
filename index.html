@@ -1671,6 +1671,79 @@ function renderExplanation(text){
   }).join('');
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   13. PREPARACIÓN Y RENDER DE PREGUNTAS (flujo lineal de 20)
+   ══════════════════════════════════════════════════════════════════════════ */
+/* Construye la lista lineal de preguntas: conserva el orden de los mundos
+   (5 preguntas por mundo) y baraja las preguntas dentro de cada mundo,
+   además de las opciones de cada pregunta. */
+function prepareAllQuestions(){
+  STATE.questions = [];
+  STATE.shuffled = [];
+  WORLDS.forEach(function(w){
+    const pool = shuffle((w.questions || []).slice());
+    pool.forEach(function(q){
+      const correct = (q.answer != null) ? Number(q.answer) : Number(q.correct);
+      STATE.questions.push(q);
+      STATE.shuffled.push(shuffleWithOptions(q.options || [], correct));
+    });
+  });
+}
+
+/* Pinta en pantalla la pregunta actual (STATE.questionIndex) junto al
+   enemigo del mundo en curso. */
+function renderQuestion(){
+  const idx = STATE.questionIndex;
+  const q = STATE.questions[idx];
+  const sh = STATE.shuffled[idx];
+  if(!q || !sh) return;
+  const world = WORLDS[STATE.worldIndex];
+  const foe = worldEnemy(world, STATE.worldIndex);
+
+  $('foeEmoji').textContent = foe.emoji;
+  $('foeName').textContent = foe.name;
+  $('phaseTag').textContent = 'Enemigo del camino';
+  $('qProgress').textContent = 'Pregunta '+(idx+1)+' de '+TOTAL_QUESTIONS+' · '+worldCode(world, STATE.worldIndex)+' · '+world.name;
+  $('qTopic').textContent = q.subtopic || world.subtopic || '';
+  $('qText').textContent = q.q;
+
+  const wrap = $('options');
+  wrap.innerHTML = '';
+  sh.options.forEach(function(opt,i){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option question-enter';
+    btn.style.animationDelay = (i*0.08)+'s';
+    btn.innerHTML = '<span class="letter">'+LETTERS[i]+'</span>'+escapeHtml(opt);
+    btn.addEventListener('click', function(){ handleAnswer(i); });
+    wrap.appendChild(btn);
+  });
+
+  /* Botón de pista (cuesta monedas) */
+  if(STATE.coins >= HINT_COST && q.explanation){
+    const hintBtn = document.createElement('button');
+    hintBtn.type = 'button';
+    hintBtn.className = 'btn btn-ghost btn-sm';
+    hintBtn.style.marginTop = '10px';
+    hintBtn.innerHTML = '💡 Pista ('+HINT_COST+' monedas) <span class="key-hint">H</span>';
+    hintBtn.addEventListener('click', function(){
+      if(STATE.coins < HINT_COST){ showToast('No tienes suficientes monedas para una pista.'); return; }
+      STATE.coins -= HINT_COST;
+      showToast('💡 Pista: '+q.explanation.split('\n')[0], 5000);
+      renderHud();
+      hintBtn.disabled = true;
+      hintBtn.style.opacity = '0.5';
+    });
+    wrap.appendChild(hintBtn);
+  }
+
+  const fb = $('battleFeedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  $('fbActions').innerHTML = '';
+  renderHud();
+}
+
 function handleAnswer(selectedIdx){
   if(STATE.partidaTerminada) return;
   const idx = STATE.questionIndex;
@@ -1737,7 +1810,7 @@ function handleAnswer(selectedIdx){
   btn.type = 'button';
   btn.className = 'btn btn-gold';
   btn.textContent = 'Continuar';
-  btn.addEventListener('click', advance);
+  btn.addEventListener('click', function(){ btn.disabled = true; advance(); });
   $('fbActions').innerHTML = '';
   $('fbActions').appendChild(btn);
 }
