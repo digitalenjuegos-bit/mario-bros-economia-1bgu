@@ -1587,13 +1587,15 @@ function openRulesModal(fullName, course){
   $('rulesCheck').checked = false;
   $('rulesBody').classList.add('rules-locked');
   $('btnAcceptRules').disabled = true;
-  $('modal-rules').hidden = false;
-  $('modal-rules').classList.add('open');
-  $('btnStart').disabled = true; /* el botón de iniciar queda bloqueado con el modal abierto */
+  const modal = $('modal-rules');
+  modal.removeAttribute('hidden');
+  modal.classList.add('open');
+  $('btnStart').disabled = true;
 }
 function closeRulesModal(){
-  $('modal-rules').classList.remove('open');
-  $('modal-rules').hidden = true;
+  const modal = $('modal-rules');
+  modal.classList.remove('open');
+  modal.setAttribute('hidden', '');
   $('btnStart').disabled = !$('studentSelect').value;
 }
 function acceptRules(){
