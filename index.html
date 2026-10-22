@@ -690,7 +690,20 @@
   .streak-milestone .emoji{ font-size:5rem; line-height:1; display:block; margin-bottom:8px; }
   .streak-milestone .text{ color:var(--gold); font-size:2rem; font-weight:800; text-shadow:0 3px 0 #7A5A00, 0 5px 10px rgba(0,0,0,.6); }
   .streak-milestone .sub{ color:#FFEFA8; font-size:1.1rem; margin-top:4px; }
+  /* ════════ RANKING, PDF E INFORME DOCENTE ════════ */
+  .btn-rank{ margin-top:10px; }
+  .rank-list{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  .rank-row{ display:flex; align-items:center; gap:10px; background:#EEF4FF; border:2px solid #2F63C8; border-radius:10px; padding:8px 12px; }
+  .rank-row.top{ background:#FFF8E4; border-color:#E0A200; }
+  .rank-pos{ font-size:1.25rem; font-weight:800; min-width:2.4rem; text-align:center; }
+  .rank-name{ flex:1; font-weight:700; color:#16305C; text-align:left; }
+  .rank-course{ color:#4A5C7C; font-size:.85rem; }
+  .rank-pts{ font-weight:800; color:#16305C; white-space:nowrap; }
+  .rank-updated{ color:#4A5C7C; font-size:.8rem; margin-top:8px; text-align:right; }
+  .report-scroll{ max-height:55vh; overflow-y:auto; margin-top:10px; text-align:left; }
+  .report-meta{ background:#EEF4FF; border:2px solid #2F63C8; border-radius:10px; padding:10px 12px; margin-top:10px; font-weight:600; color:#16305C; font-size:.95rem; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
 </head>
 <body>
 
@@ -772,6 +785,7 @@
   </div>
 
   <button class="btn btn-gold btn-block btn-wide" id="btnStart" disabled>Comenzar aventura</button>
+  <button class="btn btn-ghost btn-block btn-rank" id="btnRanking">🏆 Ranking de la clase</button>
 </section>
 
 
@@ -833,6 +847,8 @@
     </div>
     <div class="save-status" id="saveStatus"></div>
     <button class="btn btn-ghost btn-block" id="btnToggleReview">Ver revisión de respuestas</button>
+    <button class="btn btn-gold btn-block" id="btnPdfReport">⬇️ Descargar informe (PDF)</button>
+    <button class="btn btn-ghost btn-block" id="btnRanking2">🏆 Ranking de la clase</button>
     <div class="review-box" id="reviewBox" hidden></div>
   </div>
 </section>
@@ -883,6 +899,33 @@
         <span id="teacherCount" style="align-self:center;color:#4A5C7C;font-size:.9rem;"></span>
       </div>
       <div class="table-wrap" id="teacherTableWrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL RANKING ══════════ -->
+<div class="modal-overlay" id="modal-ranking" hidden>
+  <div class="modal">
+    <button class="modal-close" id="btnCloseRanking" aria-label="Cerrar">×</button>
+    <h2>🏆 Ranking de la clase</h2>
+    <p class="sub" style="color:#4A5C7C;">Solo puntos de la partida. Se actualiza cada 15 segundos mientras la ventana esté abierta.</p>
+    <div class="rank-list" id="rankingList"></div>
+    <div class="rank-updated" id="rankingUpdated"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btnRefreshRanking">🔄 Actualizar ahora</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL INFORME DOCENTE ══════════ -->
+<div class="modal-overlay" id="modal-report" hidden>
+  <div class="modal">
+    <button class="modal-close" id="btnCloseReport" aria-label="Cerrar">×</button>
+    <h2 id="reportTitle">Informe de retroalimentación</h2>
+    <div class="report-meta" id="reportMeta"></div>
+    <div class="report-scroll" id="reportBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" id="btnReportPdf">⬇️ Descargar PDF</button>
     </div>
   </div>
 </div>
@@ -1914,7 +1957,8 @@ function saveResult(nota){
           selected: a.selectedIdx,
           ok: a.ok,
           topic: a.subtopic,
-          difficulty: a.difficulty
+          difficulty: a.difficulty,
+          explanation: a.explanation || ''
         };
       })
     }
@@ -1930,9 +1974,23 @@ function saveResult(nota){
     statusEl.textContent = 'Sin conexión con el servidor. Tu resultado se guardó solo en este dispositivo. Avísale al docente.';
   }
   if(!SUPABASE_CONFIGURED){ saveLocalFallback(); return; }
-  supabaseSend('quiz_results?on_conflict=exam_id,student_name,student_lastname', 'POST', sbRow, 'resolution=merge-duplicates,return=representation')
-    .then(function(r){
-      if(!r.ok) throw new Error('HTTP '+r.status);
+  /* Guarda el resultado con reintentos. Primero intenta el upsert (que requiere
+     una restricción única en la tabla de Supabase); si la tabla aún no la
+     tiene, cae a una inserción simple para no perder la nota del estudiante. */
+  function sendRow(path, prefer, attempts){
+    const max = attempts || 2;
+    function attempt(n){
+      return supabaseSend(path, 'POST', sbRow, prefer)
+        .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r; })
+        .catch(function(err){ if(n < max) return attempt(n+1); throw err; });
+    }
+    return attempt(1);
+  }
+  sendRow('quiz_results?on_conflict=exam_id,student_name,student_lastname', 'resolution=merge-duplicates,return=representation', 2)
+    .catch(function(){
+      return sendRow('quiz_results', 'return=minimal', 2);
+    })
+    .then(function(){
       statusEl.className = 'save-status ok';
       statusEl.textContent = 'Resultado guardado correctamente.';
     })
@@ -2017,7 +2075,7 @@ function renderTeacherTable(rows){
       '<td>'+(r.total||0)+'</td>'+
       '<td><strong>'+Number(r.grade||0).toFixed(1)+'</strong></td>'+
       '<td>'+dateStr+'</td>'+
-      '<td style="white-space:nowrap;"><button class="btn btn-sm btn-danger" data-del="'+idx+'">Eliminar</button></td>'+
+      '<td style="white-space:nowrap;"><button class="btn btn-sm" data-rep="'+idx+'">📋 Informe</button> <button class="btn btn-sm btn-danger" data-del="'+idx+'">Eliminar</button></td>'+
       '</tr>';
   });
   html += '</tbody></table>';
@@ -2034,6 +2092,13 @@ function renderTeacherTable(rows){
           .then(function(){ loadTeacher(); })
           .catch(function(){ loadTeacher(); });
       });
+    });
+  });
+  wrap.querySelectorAll('[data-rep]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const idx = parseInt(this.getAttribute('data-rep'), 10);
+      if(isNaN(idx)) return;
+      viewReport(idx);
     });
   });
 }
@@ -2091,6 +2156,192 @@ function exportExcel(){
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   16b. PDF DE RETROALIMENTACIÓN, RANKING E INFORME DOCENTE
+   ══════════════════════════════════════════════════════════════════════════ */
+function sanitizeFileName(s){
+  return String(s||'').replace(/[^A-Za-z0-9ñÑáéíóúÁÉÍÓÚ ]/g,'').replace(/\s+/g,'_');
+}
+/* Genera el PDF de retroalimentación. items: [{n, question, selectedText,
+   correctText, ok, topic, explanation}]. info: {title, student, course, date,
+   scoreLine, gradeLine}. */
+function buildFeedbackPDF(info, items, fileName){
+  if(typeof jsPDF === 'undefined'){
+    showToast('No se pudo cargar el generador de PDF. Revisa tu conexión a internet.');
+    return false;
+  }
+  try{
+    const doc = new jsPDF();
+    const M = 15, W = 180;
+    let y = 18;
+    function ensure(h){ if(y + h > 282){ doc.addPage(); y = 18; } }
+    function para(txt, size, style){
+      doc.setFont('helvetica', style || 'normal');
+      doc.setFontSize(size);
+      const lines = doc.splitTextToSize(String(txt == null ? '' : txt), W);
+      const h = lines.length * (size * 0.42) + 2.5;
+      ensure(h);
+      doc.text(lines, M, y);
+      y += h;
+    }
+    para(info.title || 'Informe de retroalimentación', 14, 'bold');
+    para('Estudiante: ' + (info.student || '-') + '    Curso: ' + (info.course || '-'), 10);
+    para('Fecha: ' + (info.date || '-') + '    ' + (info.scoreLine || '') + '    ' + (info.gradeLine || ''), 10);
+    doc.setDrawColor(180);
+    ensure(6);
+    doc.line(M, y, M + W, y);
+    y += 8;
+    (items || []).forEach(function(it, i){
+      ensure(14);
+      para('Pregunta ' + (it.n || (i + 1)) + (it.topic ? ' - Tema: ' + it.topic : ''), 11, 'bold');
+      para(it.question || '', 10);
+      para('Tu respuesta: ' + (it.selectedText || '(Sin respuesta)') + (it.ok ? '  [CORRECTA]' : '  [INCORRECTA]'), 10, it.ok ? 'normal' : 'bold');
+      if(!it.ok) para('Respuesta correcta: ' + (it.correctText || '-'), 10);
+      if(it.explanation) para('Explicación: ' + it.explanation, 9);
+      y += 4;
+    });
+    para('Informe generado por la app Mario y la Economía del Reino.', 8);
+    doc.save(fileName || 'informe.pdf');
+    showToast('⬇️ PDF generado.');
+    return true;
+  }catch(e){
+    showToast('Ocurrió un error al generar el PDF.');
+    return false;
+  }
+}
+/* PDF del estudiante desde la pantalla de victoria. */
+function studentPdfFromState(){
+  const items = STATE.answered.map(function(a, i){
+    return {
+      n: (a.qi != null ? a.qi : i) + 1,
+      question: a.q,
+      selectedText: a.options[a.selectedIdx],
+      correctText: a.options[a.correctIdx],
+      ok: a.ok,
+      topic: a.subtopic,
+      explanation: a.explanation
+    };
+  });
+  const nota = Math.round(Math.min(10, Math.max(0, STATE.correct * POINTS_PER_QUESTION)) * 10) / 10;
+  buildFeedbackPDF({
+    title: (BANK.title || 'Mario Bros') + ' - Informe de retroalimentación',
+    student: STATE.studentName + ' ' + STATE.studentLastname,
+    course: STATE.course,
+    date: new Date().toLocaleString('es-EC'),
+    scoreLine: 'Aciertos: ' + STATE.correct + ' de ' + TOTAL_QUESTIONS,
+    gradeLine: 'Nota: ' + nota.toFixed(1) + '/10'
+  }, items,
+  'Economia1BGU_' + sanitizeFileName(STATE.studentLastname + ' ' + STATE.studentName) + '.pdf');
+}
+/* ── Ranking de la clase (solo puntos) ── */
+let rankingInt = null;
+function openRanking(){
+  $('modal-ranking').hidden = false;
+  $('modal-ranking').classList.add('open');
+  loadRanking();
+  if(rankingInt) clearInterval(rankingInt);
+  rankingInt = setInterval(loadRanking, 15000);
+}
+function closeRanking(){
+  $('modal-ranking').classList.remove('open');
+  $('modal-ranking').hidden = true;
+  if(rankingInt){ clearInterval(rankingInt); rankingInt = null; }
+}
+function loadRanking(){
+  const list = $('rankingList');
+  if(!SUPABASE_CONFIGURED){
+    list.innerHTML = '<p style="color:#B3282D;text-align:center;padding:16px;">Supabase no está configurado. Revisa las credenciales.</p>';
+    return;
+  }
+  supabaseGet('quiz_results?exam_id=eq.'+EXAM_ID+'&select=student_name,student_lastname,course,score,total,timestamp&order=score.desc,timestamp.asc&limit=10')
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(rows){
+      rows = rows || [];
+      const medals = ['🥇','🥈','🥉'];
+      if(!rows.length){
+        list.innerHTML = '<p style="color:#4A5C7C;text-align:center;padding:16px;">Aún no hay resultados. ¡Sé el primero en la tabla!</p>';
+      } else {
+        let html = '';
+        rows.forEach(function(r, i){
+          html += '<div class="rank-row'+(i < 3 ? ' top' : '')+'">'+
+            '<span class="rank-pos">'+(medals[i] || ('#'+(i+1)))+'</span>'+
+            '<span class="rank-name">'+escapeHtml((r.student_name||'')+' '+(r.student_lastname||''))+'</span>'+
+            '<span class="rank-course">'+escapeHtml(r.course||'')+'</span>'+
+            '<span class="rank-pts">'+(r.score||0)+' / '+(r.total||0)+' pts</span>'+
+            '</div>';
+        });
+        list.innerHTML = html;
+      }
+      $('rankingUpdated').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-EC');
+    })
+    .catch(function(){
+      list.innerHTML = '<p style="color:#B3282D;text-align:center;padding:16px;">No se pudo cargar el ranking. Revisa tu conexión a internet.</p>';
+    });
+}
+/* ── Informe de retroalimentación desde el panel docente ── */
+let currentReportRow = null;
+function viewReport(idx){
+  const row = currentTeacherRows[idx];
+  if(!row) return;
+  currentReportRow = row;
+  const items = (row.answers && row.answers.items) || [];
+  $('reportTitle').textContent = '📋 Informe de ' + (row.student_name||'') + ' ' + (row.student_lastname||'');
+  $('reportMeta').innerHTML = 'Curso: ' + escapeHtml(row.course||'-') +
+    ' · Aciertos: ' + (row.score||0) + ' de ' + (row.total||0) +
+    ' · Nota: ' + Number(row.grade||0).toFixed(1) + '/10' +
+    ' · Fecha: ' + (row.timestamp ? new Date(row.timestamp).toLocaleString('es-EC') : '-');
+  if(!items.length){
+    $('reportBody').innerHTML = '<p style="color:#4A5C7C;padding:12px;">Este registro no guarda respuestas detalladas.</p>';
+  } else {
+    let html = '';
+    items.forEach(function(it, i){
+      const opts = it.options || [];
+      const sel = opts[it.selected];
+      const cor = opts[it.correct];
+      html += '<div class="review-item">'+
+        '<div class="rq"><span class="rq-n">Pregunta '+(it.qi != null ? it.qi + 1 : i + 1)+(it.world ? ' · '+escapeHtml(it.world) : '')+'</span>'+escapeHtml(it.question||'')+'</div>'+
+        '<div class="ra"><span class="tag '+(it.ok ? 'right' : 'yours')+'">'+(it.ok ? 'Correcta' : 'Su respuesta')+': </span>'+escapeHtml(sel == null ? '(Sin respuesta)' : sel)+'</div>'+
+        (it.ok ? '' : '<div class="ra"><span class="tag right">Respuesta correcta: </span>'+escapeHtml(cor == null ? '-' : cor)+'</div>')+
+        (it.topic ? '<div class="ra" style="color:#4A5C7C;">Tema: '+escapeHtml(it.topic)+'</div>' : '')+
+        (it.explanation ? '<div class="exp-block" style="margin-top:8px;"><span class="exp-head">Explicación</span>'+renderExplanation(it.explanation)+'</div>' : '')+
+        '</div>';
+    });
+    $('reportBody').innerHTML = html;
+  }
+  $('modal-report').hidden = false;
+  $('modal-report').classList.add('open');
+}
+function closeReport(){
+  $('modal-report').classList.remove('open');
+  $('modal-report').hidden = true;
+  currentReportRow = null;
+}
+function teacherReportPdf(){
+  if(!currentReportRow) return;
+  const row = currentReportRow;
+  const items = ((row.answers && row.answers.items) || []).map(function(it, i){
+    const opts = it.options || [];
+    return {
+      n: (it.qi != null ? it.qi : i) + 1,
+      question: it.question,
+      selectedText: opts[it.selected],
+      correctText: opts[it.correct],
+      ok: it.ok,
+      topic: it.topic,
+      explanation: it.explanation
+    };
+  });
+  buildFeedbackPDF({
+    title: (BANK.title || 'Mario Bros') + ' - Informe de retroalimentación',
+    student: (row.student_name||'') + ' ' + (row.student_lastname||''),
+    course: row.course,
+    date: row.timestamp ? new Date(row.timestamp).toLocaleString('es-EC') : '-',
+    scoreLine: 'Aciertos: ' + (row.score||0) + ' de ' + (row.total||0),
+    gradeLine: 'Nota: ' + Number(row.grade||0).toFixed(1) + '/10'
+  }, items,
+  'Economia1BGU_' + sanitizeFileName(row.student_lastname + ' ' + row.student_name) + '.pdf');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    17. EVENTOS
    ══════════════════════════════════════════════════════════════════════════ */
 $('studentSelect').addEventListener('change', function(){
@@ -2129,6 +2380,15 @@ $('btnExport').addEventListener('click', exportExcel);
 $('btnClearAll').addEventListener('click', clearAllGrades);
 $('modal-teacher').addEventListener('click', function(e){ if(e.target === this) closeTeacherModal(); });
 $('modal-rules').addEventListener('click', function(e){ if(e.target === this) closeRulesModal(); });
+$('btnRanking').addEventListener('click', openRanking);
+$('btnRanking2').addEventListener('click', openRanking);
+$('btnCloseRanking').addEventListener('click', closeRanking);
+$('btnRefreshRanking').addEventListener('click', loadRanking);
+$('modal-ranking').addEventListener('click', function(e){ if(e.target === this) closeRanking(); });
+$('btnPdfReport').addEventListener('click', studentPdfFromState);
+$('btnCloseReport').addEventListener('click', closeReport);
+$('btnReportPdf').addEventListener('click', teacherReportPdf);
+$('modal-report').addEventListener('click', function(e){ if(e.target === this) closeReport(); });
 
 /* ══════════════════════════════════════════════════════════════════════════
    18. INICIALIZACIÓN
