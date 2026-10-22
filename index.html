@@ -1066,8 +1066,8 @@ function normalizeBank(raw){
 }
 const BANK = normalizeBank(QUESTION_BANK) || normalizeBank(QUESTION_BANK_EJEMPLO);
 const WORLDS = BANK.worlds;
-const TOTAL_QUESTIONS = Number(BANK.total_questions) > 0 ? Number(BANK.total_questions) : WORLDS.reduce(function(s,w){ return s + w.questions.length; }, 0);
-const POINTS_PER_QUESTION = Number(BANK.points_per_question) > 0 ? Number(BANK.points_per_question) : DEFAULT_POINTS;
+const TOTAL_QUESTIONS = WORLDS.reduce(function(s,w){ return s + (w.questions ? w.questions.length : 0); }, 0);
+const POINTS_PER_QUESTION = TOTAL_QUESTIONS > 0 ? 10 / TOTAL_QUESTIONS : DEFAULT_POINTS;
 const ENEMY_DEFAULTS = [
   { enemy:'Goomba', emoji:'🍄' },
   { enemy:'Koopa', emoji:'🐢' },
@@ -1129,7 +1129,16 @@ function normalizeName(s){ return String(s||'').toUpperCase().trim().replace(/\s
    Regla práctica: 2 tokens = 1 apellido + 1 nombre; 3 tokens = 2 + 1;
    4 tokens = 2 + 2; 5 tokens = 3 + 2; 6 o más = 3 + resto. */
 function parseName(fullName){
-  const tokens = String(fullName).trim().split(/\s+/);
+  const s = String(fullName).trim();
+  // Formato roster: "APELLIDOS, NOMBRE"
+  if(s.includes(',')){
+    const parts = s.split(',').map(x => x.trim());
+    if(parts.length === 2){
+      return { lastname: parts[0], name: parts[1] };
+    }
+  }
+  // Fallback: formato antiguo "APELLIDO1 APELLIDO2 NOMBRE1 NOMBRE2"
+  const tokens = s.split(/\s+/);
   let split = 2;
   if(tokens.length <= 2) split = 1;
   else if(tokens.length === 3) split = 2;
@@ -1301,6 +1310,7 @@ const STATE = {
   shuffled:[],            /* {options, answerIdx} por cada pregunta */
   correct:0, coins:0,
   answered:[],            /* respuestas aceptadas */
+  clearedWorlds:[],       /* índices de mundos completados */
   completed:false, partidaTerminada:false, starting:false
 };
 
@@ -1480,6 +1490,7 @@ function saveProgress(){
     correct: STATE.correct,
     coins: STATE.coins,
     answered: STATE.answered,
+    clearedWorlds: STATE.clearedWorlds,
     completed: STATE.completed,
     score: STATE.correct,
     total: TOTAL_QUESTIONS,
@@ -1560,20 +1571,20 @@ function onStartClick(){
   checkExistingAttempt(fullName, course).then(function(res){
     STATE.starting = false;
     $('btnStart').textContent = 'Comenzar aventura';
+    if(res.reason === 'sin-conexion-permitido'){
+      showNameError('⚠️ No se pudo verificar el servidor, pero puedes continuar. Tu progreso se guardará localmente.');
+    }
     if(res.blocked){
       $('btnStart').disabled = false;
       if(res.reason === 'sin-conexion'){
         showNameError('No se pudo verificar si ya realizaste esta evaluación. Revisa tu conexión a internet y vuelve a intentar. Por seguridad, el intento queda cerrado mientras el servidor no responda.');
         return;
       }
-      if(res.reason === 'sin-conexion-permitido'){
-        showNameError('⚠️ No se pudo verificar el servidor, pero puedes continuar. Tu progreso se guardará localmente.');
-      }
       const rec = res.record || {};
       const nota = Number(rec.grade||0).toFixed(1);
       const aciertos = rec.score != null ? rec.score : '?';
       const total = rec.total || TOTAL_QUESTIONS;
-      const fecha = rec.timestamp ? new Date(rec.timestamp).toLocaleString('es-EC') : 'fecha desconocida';
+      const fecha = res.timestamp ? new Date(res.timestamp).toLocaleString('es-EC') : 'fecha desconocida';
       showNameError('Ya completaste esta evaluación. Tu nota fue <strong>'+nota+'</strong> sobre 10 ('+aciertos+' de '+total+' aciertos), registrada el '+fecha+'. Solo se permite un intento por estudiante.');
       return;
     }
@@ -1634,6 +1645,7 @@ function launchGame(fullName, course){
     STATE.correct = STATE.answered.filter(function(a){ return a.ok; }).length;
     STATE.coins = STATE.correct;
     STATE.worldIndex = Math.floor(STATE.questionIndex / 5);
+    STATE.clearedWorlds = local.clearedWorlds || [];
     prepareAllQuestions();
     showScreen('screen-battle');
     renderQuestion();
@@ -1743,6 +1755,10 @@ function advance(){
   /* Cambio de mundo cada 5 preguntas */
   const newWorldIndex = Math.floor(STATE.questionIndex / 5);
   if(newWorldIndex !== STATE.worldIndex && newWorldIndex < WORLDS.length){
+    /* Marcar mundo anterior como completado */
+    if(!STATE.clearedWorlds.includes(STATE.worldIndex)){
+      STATE.clearedWorlds.push(STATE.worldIndex);
+    }
     const oldWorld = STATE.worldIndex;
     STATE.worldIndex = newWorldIndex;
     showWorldTransition(newWorldIndex, function(){
@@ -1788,7 +1804,7 @@ function buildReview(){
   }
   let html = '';
   STATE.answered.forEach(function(a){
-    const qNum = a.qi + 1;
+    const qNum = (a.qi !== undefined ? a.qi : STATE.answered.indexOf(a)) + 1;
     html += '<div class="review-item">'+
       '<div class="rq"><span class="rq-n">Pregunta '+qNum+'</span>'+escapeHtml(a.q)+'</div>'+
       '<div class="ra"><span class="tag yours">Tu respuesta: </span>'+escapeHtml(a.options[a.selectedIdx])+'</div>'+
@@ -1841,7 +1857,7 @@ function saveResult(nota){
     statusEl.textContent = 'Sin conexión con el servidor. Tu resultado se guardó solo en este dispositivo. Avísale al docente.';
   }
   if(!SUPABASE_CONFIGURED){ saveLocalFallback(); return; }
-  supabaseSend('quiz_results', 'POST', sbRow, 'resolution=merge-duplicates,return=representation')
+  supabaseSend('quiz_results?on_conflict=exam_id,student_name,student_lastname', 'POST', sbRow, 'resolution=merge-duplicates,return=representation')
     .then(function(r){
       if(!r.ok) throw new Error('HTTP '+r.status);
       statusEl.className = 'save-status ok';
@@ -2010,7 +2026,8 @@ $('studentSelect').addEventListener('change', function(){
   const box = $('resumeBox');
   if(local && !local.completed && local.answered && local.answered.length){
     box.hidden = false;
-    box.innerHTML = 'Tienes una aventura a medias en este dispositivo. Al comenzar, continúas en el mundo '+(local.worldIndex+1)+'.';
+    const qNum = (local.questionIndex || 0) + 1;
+    box.innerHTML = 'Tienes una aventura a medias en este dispositivo. Al comenzar, continúas en la pregunta '+qNum+' de '+TOTAL_QUESTIONS+'.';
   } else {
     box.hidden = true;
   }
