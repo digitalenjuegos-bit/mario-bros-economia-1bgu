@@ -1522,14 +1522,13 @@ function checkExistingAttempt(fullName, course){
       return { blocked:false, reason:'ok' };
     })
     .catch(function(err){
-      /* FAIL-CLOSED: si no se puede leer el estado remoto no se abre un intento
-         nuevo. Si el estudiante ya tiene una partida en curso guardada en este
-         dispositivo, se le deja continuar: ese registro prueba que el intento
-         ya fue autorizado en su momento. */
-      if(local && !local.completed && local.answered){
-        return { blocked:false, reason:'continuar' };
+      /* FAIL-OPEN: si no se puede leer el estado remoto, permitimos empezar
+         pero mostramos aviso. Solo bloqueamos si hay registro local completado. */
+      if(local && local.completed){
+        return { blocked:true, reason:'local', record:local };
       }
-      return { blocked:true, reason:'sin-conexion', error:err };
+      console.warn('No se pudo verificar intento en Supabase:', err);
+      return { blocked:false, reason:'sin-conexion-permitido', error:err };
     });
 }
 
@@ -1566,6 +1565,9 @@ function onStartClick(){
       if(res.reason === 'sin-conexion'){
         showNameError('No se pudo verificar si ya realizaste esta evaluación. Revisa tu conexión a internet y vuelve a intentar. Por seguridad, el intento queda cerrado mientras el servidor no responda.');
         return;
+      }
+      if(res.reason === 'sin-conexion-permitido'){
+        showNameError('⚠️ No se pudo verificar el servidor, pero puedes continuar. Tu progreso se guardará localmente.');
       }
       const rec = res.record || {};
       const nota = Number(rec.grade||0).toFixed(1);
