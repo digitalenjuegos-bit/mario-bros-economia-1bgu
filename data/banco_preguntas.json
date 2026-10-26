@@ -1,7 +1,7 @@
 {
   "exam_id": "mario-bros-economia-1bgu",
   "title": "Mario y la Economía del Reino",
-  "subtitle": "Historia y Ciudadanía · 1BGU",
+  "subtitle": "Introducción a la Economía",
   "points_per_question": 0.5,
   "total_questions": 20,
   "worlds": [
@@ -11,77 +11,49 @@
       "name": "La Aldea de los Pícaros",
       "enemy": "Goomba",
       "emoji": "🍄",
-      "subtopic": "Escasez, necesidades y deseos, recursos limitados, costo de oportunidad y bienes gratuitos",
+      "subtopic": "La economía como ciencia social: definición, conceptos clave y las dos ramas",
       "questions": [
         {
           "id": "1-1",
-          "q": "En el Reino Champiñón todos quieren más monedas de las que el tesoro puede repartir. ¿Qué describe mejor esa situación?",
-          "options": [
-            "La escasez: los deseos de la población son ilimitados y los recursos son limitados.",
-            "La abundancia: los recursos disponibles son tantos que cubren todos los deseos.",
-            "El equilibrio: cada deseo de la población se compensa con un recurso disponible.",
-            "La productividad: cada trabajador genera más recursos de los que la población consume."
-          ],
-          "answer": 0,
-          "subtopic": "Escasez y recursos limitados",
           "difficulty": 1,
-          "explanation": "La escasez aparece cuando los deseos humanos son ilimitados y los recursos para satisfacerlos son limitados."
+          "subtopic": "Definición de economía",
+          "q": "Un vecino de la aldea cree que la economía sirve para saber cuánto dinero tiene cada familia. Toad le responde con la definición del curso. ¿Cuál es esa definición?",
+          "explanation": "La economía estudia cómo las sociedades usan sus recursos escasos para producir bienes y servicios, satisfacer necesidades ilimitadas y distribuirlos entre grupos.",
+          "options": [
+            "Estudia cómo los bancos fijan la tasa de interés que cobran a las familias y a las empresas del reino.",
+            "Estudia cómo el gobierno decide el precio de cada bien que se vende en los mercados del reino.",
+            "Estudia cómo las sociedades usan recursos escasos para producir, satisfacer necesidades y distribuir.",
+            "Estudia cómo las personas reparten su sueldo entre el ahorro y el consumo de cada semana."
+          ],
+          "answer": 2
         },
         {
           "id": "1-2",
-          "q": "Mario puede usar su tiempo para recoger monedas o para saltar sobre Goombas. Al elegir una cosa renuncia a la otra. ¿Qué nombre recibe esa renuncia?",
+          "difficulty": 2,
+          "subtopic": "Nueve conceptos clave",
+          "q": "El alcalde quiere que la aldea produzca más sin agotar el bosque y sin dejar a los vecinos fuera del reparto. ¿Qué dos conceptos clave está tratando de equilibrar?",
+          "explanation": "La sostenibilidad busca usar los recursos sin agotarlos y la equidad busca repartir lo producido con justicia.",
           "options": [
-            "El ingreso del jugador, es decir, lo que entra en su bolsillo en cada nivel superado.",
-            "El beneficio secundario, es decir, lo que se gana además del resultado principal.",
-            "El costo de oportunidad, es decir, lo que se sacrifica al elegir una alternativa.",
-            "El costo de la actividad, es decir, lo que se gasta en monedas y tiempo para hacerla."
+            "Sostenibilidad y equidad: usar los recursos sin agotarlos y repartir lo producido con justicia.",
+            "Eficiencia e intervención: producir sin desperdiciar nada y dejar que el Estado fije cada precio.",
+            "Cambio e interdependencia: aceptar que la aldea se transforma con el tiempo y que los vecinos se necesitan.",
+            "Escasez y bienestar económico: reconocer que faltan recursos y que todos los vecinos desean más."
           ],
-          "answer": 2,
-          "subtopic": "Costo de oportunidad",
-          "difficulty": 1,
-          "explanation": "El costo de oportunidad es el valor de la mejor alternativa a la que se renuncia al elegir una opción."
+          "answer": 0
         },
         {
           "id": "1-3",
-          "q": "En la Aldea de los Pícaros el agua contaminada del río se reparte sin cobrar a nadie. ¿Cómo se clasifica ese agua?",
-          "options": [
-            "Es un bien gratuito absoluto, porque nadie paga por obtenerla ni por usarla nunca.",
-            "Es un bien gratuito en el precio, aunque tiene un costo social que asume la comunidad.",
-            "No es un bien gratuito, porque en cuanto genera costos deja de tener precio igual a cero.",
-            "Es un bien normal, porque su consumo aumenta cuando sube el precio de mercado."
-          ],
-          "answer": 1,
-          "subtopic": "Bienes gratuitos",
           "difficulty": 2,
-          "explanation": "Un bien gratuito es el que no tiene precio, pero eso no significa que no tenga costo: el agua contaminada impone costos de salud a la comunidad."
-        },
-        {
-          "id": "1-4",
-          "q": "Los Goombas se reproducen tan rápido que en una semana hay el doble que en la anterior, y el campo de setas sigue siendo el mismo. ¿Qué expresa ese ejemplo?",
+          "subtopic": "Microeconomía y macroeconomía",
+          "q": "El periódico del reino trae dos titulares: uno sobre la panadería que subió el precio del pan y otro sobre la meta de crecimiento de todo el reino. ¿Cómo se clasifican?",
+          "explanation": "La microeconomía estudia agentes individuales y la macroeconomía estudia la economía en su conjunto.",
           "options": [
-            "Que los recursos aumentan más rápido que las necesidades de la población en cada periodo económico.",
-            "Que las necesidades de la población se reducen cuando los recursos resultan limitados.",
-            "Que la población se mantiene estable gracias al aumento continuo de sus recursos.",
-            "Que los recursos son limitados mientras las necesidades de la población aumentan sin freno."
+            "El primero es macroeconomía y el segundo es microeconomía, porque el precio del pan lo pagan todos los habitantes del reino.",
+            "Los dos son microeconomía, porque en ambos titulares se habla de precios y de decisiones de producción.",
+            "Los dos son macroeconomía, porque cualquier precio del pan influye en las metas del país entero.",
+            "El primero es microeconomía y el segundo es macroeconomía, porque uno mira un agente y el otro el conjunto."
           ],
-          "answer": 3,
-          "subtopic": "Escasez y recursos limitados",
-          "difficulty": 2,
-          "explanation": "El ejemplo muestra la escasez: los recursos disponibles no crecen al mismo ritmo que las necesidades de la población."
-        },
-        {
-          "id": "1-5",
-          "q": "En un nivel, Toad ofrece a Mario dos caminos: uno con muchas monedas y otro con una estrella que da poderes. ¿Qué debe comparar Mario?",
-          "options": [
-            "El costo de oportunidad de cada camino: lo que renuncia a obtener al elegir uno de ellos.",
-            "La cantidad total de monedas de cada camino, sin considerar lo que se deja de ganar en el otro.",
-            "El tiempo que tarda en recorrer cada camino, medido en minutos dentro del nivel.",
-            "La dificultad de cada camino, porque el más difícil siempre da mejores recompensas."
-          ],
-          "answer": 0,
-          "subtopic": "Costo de oportunidad",
-          "difficulty": 2,
-          "explanation": "La elección económica pide comparar el costo de oportunidad de cada alternativa, no solo lo que se gana en una de ellas."
+          "answer": 3
         }
       ]
     },
@@ -91,237 +63,275 @@
       "name": "El Bosque de las Decisiones",
       "enemy": "Koopa",
       "emoji": "🐢",
-      "subtopic": "Las tres preguntas económicas básicas y los medios de resolverlas: el mercado frente a la intervención gubernamental",
+      "subtopic": "Escasez, elección, costo de oportunidad y análisis marginal",
       "questions": [
         {
           "id": "2-1",
-          "q": "El rey Koopa ordena al Bosque que fabrique 100 armaduras adicionales este año. ¿Qué pregunta económica básica está resolviendo?",
-          "options": [
-            "Para quién producir, es decir, definir cómo se distribuye lo producido entre toda la población.",
-            "Cómo producir, es decir, elegir la técnica y los recursos que se usan en la elaboración.",
-            "Qué producir, es decir, decidir qué bienes y servicios se producen en la economía del reino.",
-            "Si producir, es decir, decidir si la economía debe crecer o mantenerse estable."
-          ],
-          "answer": 2,
-          "subtopic": "Preguntas económicas básicas",
           "difficulty": 1,
-          "explanation": "Las preguntas económicas básicas son qué o cuánto producir, cómo producir y para quién producir."
+          "subtopic": "Escasez",
+          "q": "En el bosque sobran setas comunes, pero todos quieren la seta dorada y esta temporada solo crecieron tres. ¿Qué muestra ese caso?",
+          "explanation": "La escasez aparece porque los deseos son ilimitados y los recursos para satisfacerlos son limitados.",
+          "options": [
+            "Que la escasez desaparece cuando un bien se puede conseguir sin pagar nada por él en el bosque.",
+            "Que la escasez nace de la relación entre deseos ilimitados y recursos limitados.",
+            "Que la abundancia de un solo bien impide que los demás bienes del bosque se vuelvan escasos.",
+            "Que la escasez de un bien depende del precio que el mercado fije para ese bien disponible."
+          ],
+          "answer": 1
         },
         {
           "id": "2-2",
-          "q": "En el Bosque hay dos canteras y ninguna ley que diga cuál usar. Los herreros compran la piedra de la cantera más cercana. ¿Qué medio resolvieron?",
-          "options": [
-            "El plan del reino, que reparte las canteras entre los talleres según una tabla anual fija.",
-            "El gobierno, que decide de antemano cuánto piedra se extrae en total cada estación del año.",
-            "El gobierno, que ordena a los herreros comprar a la cantera que tenga la piedra más barata.",
-            "El mercado, porque el precio de la piedra guía la decisión de comprar y la de producir."
-          ],
-          "answer": 3,
-          "subtopic": "Mercado e intervención gubernamental",
           "difficulty": 2,
-          "explanation": "Sin normas del Estado, el precio coordina las decisiones de comprar y de vender: es el mercado funcionando."
+          "subtopic": "Costo de oportunidad",
+          "q": "Koopa tiene libre la tarde del sábado: puede entrenar en el castillo o ayudar en la tienda de Toad. Decide entrenar. ¿Cuál fue su costo de oportunidad?",
+          "explanation": "El costo de oportunidad es la siguiente mejor alternativa a la que se renuncia al tomar una decisión.",
+          "options": [
+            "El cansancio que le dejó el entrenamiento, porque es el precio físico de haber elegido.",
+            "El tiempo completo de la tarde, porque lo gastó entero en una sola actividad del sábado.",
+            "Lo que habría ganado si además hubiera entrenado el domingo por la mañana temprano.",
+            "La ayuda que dejó de dar en la tienda, porque era su siguiente mejor alternativa."
+          ],
+          "answer": 3
         },
         {
           "id": "2-3",
-          "q": "El Bosque enfrenta una sequía que vacía los ríos. El gobierno decide cuánto agua se reparte a cada taller. ¿Qué problema está resolviendo?",
-          "options": [
-            "El de cuánto producir, porque ajusta el volumen de armaduras que se esperan para cada año.",
-            "El de cómo producir y para quién producir, al repartir un recurso escaso entre vecinos.",
-            "El de qué producir, porque cambia el tipo de bien que se fabrica en todo el Bosque.",
-            "El de para quién producir, porque fija qué comunidades reciben el agua primero."
-          ],
-          "answer": 1,
-          "subtopic": "Preguntas económicas básicas",
           "difficulty": 2,
-          "explanation": "Repartir agua entre talleres es decidir cómo se produce y a quién le corresponde el recurso escaso."
+          "subtopic": "Análisis marginal",
+          "q": "Un herrero lleva ocho horas de trabajo y nota que cada hora extra rinde menos piezas. ¿Cómo decide con análisis marginal si trabaja una hora más?",
+          "explanation": "El análisis marginal compara los beneficios y los costos de una unidad adicional, no el total acumulado.",
+          "options": [
+            "Compara el total de piezas de las nueve horas con el total de las ocho horas ya trabajadas.",
+            "Compara lo que produce esa hora extra con lo que le cuesta quedarse una hora más.",
+            "Repite la misma jornada de ocho horas, porque fue la que dio el mejor resultado medido.",
+            "Suma el costo de todas las horas del día y lo divide entre el total de piezas producidas."
+          ],
+          "answer": 1
         },
         {
           "id": "2-4",
-          "q": "Los herreros del Bosque quieren discutir quién recibe las armaduras, pero el rey solo se preocupa por no producir de menos. ¿Qué prioridad revela esa situación?",
-          "options": [
-            "Que el gobierno atiende primero el problema de cuánto producir y deja para después el reparto.",
-            "Que el gobierno prioriza el reparto y postpone la decisión sobre cuánto se produce cada año del calendario.",
-            "Que el problema central del Bosque es la técnica usada y no la cantidad de armaduras.",
-            "Que el mercado ya repartió las armaduras y solo queda pendiente el aumento de la producción."
-          ],
-          "answer": 0,
-          "subtopic": "Preguntas económicas básicas",
           "difficulty": 3,
-          "explanation": "El orden en que el Estado atiende sus problemas revela sus prioridades: primero cuánto producir y después para quién."
-        },
-        {
-          "id": "2-5",
-          "q": "En el Bosque, el rey fija por ley el precio del pan. Ese precio artificial guía las compras de los herreros. ¿Qué se usa para resolver la pregunta de qué producir?",
+          "subtopic": "Escasez, elección y compensaciones",
+          "q": "El rey reparte todo el hierro del bosque entre espadas y armaduras. Si quiere más espadas, debe aceptar menos armaduras. ¿Qué revela esa situación?",
+          "explanation": "La escasez obliga a elegir y toda elección implica una compensación: se sacrifica la alternativa no elegida.",
           "options": [
-            "La libertad de precios, que permite que el mercado ajuste la producción al trigo disponible cada año.",
-            "La costumbre del Bosque, que fija la producción de pan según las necesidades de cada año.",
-            "El control del gobierno sobre los precios, que guía la producción sin considerar la escasez real.",
-            "La decisión de los talleres, que eligen producir pan porque el precio lo hace rentable."
+            "Que toda decisión económica tiene una compensación: elegir algo obliga a sacrificar otra cosa.",
+            "Que con mejor tecnología el reino podría producir espadas y armaduras sin sacrificar nada.",
+            "Que el rey no enfrenta escasez, porque el hierro del bosque alcanza para los dos talleres.",
+            "Que la escasez se resuelve cuando el gobierno decide qué se fabrica en cada taller del reino cada mes."
           ],
-          "answer": 2,
-          "subtopic": "Mercado e intervención gubernamental",
-          "difficulty": 3,
-          "explanation": "Un precio fijado por el Estado manda sobre el mercado y termina guiando la producción, aunque la escasez real no cambie."
+          "answer": 0
         }
       ]
     },
     {
       "id": 3,
       "code": "Mundo 1-3",
-      "name": "El Reino de las Tres Leyes",
+      "name": "El Reino de los Cuatro Factores",
       "enemy": "Cheep Cheep",
       "emoji": "🐟",
-      "subtopic": "Sistemas económicos: libre mercado, planificada y mixta, quién decide y qué problema resuelve cada uno",
+      "subtopic": "Factores de producción: tierra, trabajo, capital físico, capital humano y emprendimiento",
       "questions": [
         {
           "id": "3-1",
-          "q": "En el Reino de las Tres Leyes, el Carnaval decide cada año cuánto pan se produce y quién lo recibe. ¿Qué sistema económico describe esa situación?",
-          "options": [
-            "El sistema de libre mercado, porque la producción sigue los precios que fija la demanda.",
-            "El sistema planificado, porque el Estado central decide qué producir y para quién.",
-            "El sistema mixto, porque el Estado coordina y los particulares producen por su cuenta.",
-            "El sistema feudal, donde el señor del castillo reparte la producción entre sus vasallos."
-          ],
-          "answer": 1,
-          "subtopic": "Sistemas económicos",
           "difficulty": 1,
-          "explanation": "Cuando el Estado central decide qué se produce y para quién, el sistema económico es planificado."
+          "subtopic": "Tierra",
+          "q": "Un pescador usa el agua del lago y la madera que corta en el bosque. ¿Cómo se clasifican esos dos recursos como factores de producción?",
+          "explanation": "La tierra es todo recurso natural usado para producir bienes y servicios, como el agua y la madera.",
+          "options": [
+            "Los dos son capital físico, porque alguien los transformó antes de que el pescador los usara.",
+            "El agua es tierra y la madera es trabajo, porque hubo esfuerzo humano al cortarla.",
+            "Los dos son tierra, porque son recursos naturales que se usan para producir bienes.",
+            "El agua es capital y la madera es tierra, porque una se extrae y la otra se procesa."
+          ],
+          "answer": 2
         },
         {
           "id": "3-2",
-          "q": "En un tramo del Reino, cada panadería fija su propio precio y los clientes compran donde prefieran. ¿Qué sistema económico funciona en ese tramo?",
-          "options": [
-            "El sistema planificado, porque el Estado fija los precios y las cantidades de pan cada día del año.",
-            "El sistema mixto, porque el Estado y las panaderías acuerdan el precio antes de cada venta.",
-            "El sistema de empresa privada, donde el rey no interviene en ninguna decisión económica.",
-            "El libre mercado, porque el precio lo fijan los vendedores y las decisiones son individuales."
-          ],
-          "answer": 3,
-          "subtopic": "Sistema de libre mercado",
           "difficulty": 2,
-          "explanation": "En el libre mercado las decisiones económicas son individuales y los precios los fijan quienes venden."
+          "subtopic": "Capital físico y capital humano",
+          "q": "El rey compra un horno nuevo y además paga un curso para que el panadero aprenda a usarlo. ¿Cuál afirmación es correcta?",
+          "explanation": "El capital físico es un recurso creado por humanos para producir otros bienes; el capital humano son habilidades o conocimientos adquiridos.",
+          "options": [
+            "El horno es capital físico y el curso forma capital humano en el panadero.",
+            "Los dos son capital físico, porque ambos aumentan la producción diaria de la panadería.",
+            "Los dos son capital humano, porque dependen del conocimiento que tiene una persona.",
+            "El horno es capital humano y el curso es capital físico, porque el curso se compra."
+          ],
+          "answer": 0
         },
         {
           "id": "3-3",
-          "q": "El Rey quiere construir una escuela pública de pesca para los pescadores, que ya pagan sus propias escuelas. ¿Qué problema resuelve el sistema mixto?",
-          "options": [
-            "Combina la decisión del Estado con la actividad privada para ampliar la oferta de educación.",
-            "Elimina la iniciativa privada, porque solo el Estado decide cuánto se educa a los jóvenes.",
-            "Sustituye al libre mercado, porque ninguna actividad privada puede ofrecer servicios de educación.",
-            "No resuelve ningún problema, porque la mezcla de sistemas siempre produce ineficiencia."
-          ],
-          "answer": 0,
-          "subtopic": "Sistema económico mixto",
           "difficulty": 2,
-          "explanation": "El sistema mixto combina la planificación estatal con la iniciativa privada, como cuando el Estado ofrece algo que los particulares ya cubrían."
+          "subtopic": "Emprendimiento",
+          "q": "Toad reúne el ahorro de tres vecinos, alquila un terreno, contrata dos panaderos y abre una panadería. ¿Qué factor de producción representa su papel?",
+          "explanation": "El emprendimiento son los líderes que reúnen los otros factores para producir bienes y servicios.",
+          "options": [
+            "Trabajo, porque dedica su esfuerzo diario a que la panadería del reino funcione bien.",
+            "Capital humano, porque los conocimientos que adquirió le permiten organizar todo.",
+            "Tierra, porque el negocio depende del terreno que decidió alquilar para abrirlo.",
+            "Emprendimiento, porque reúne los demás factores y asume el riesgo de la idea."
+          ],
+          "answer": 3
         },
         {
           "id": "3-4",
-          "q": "Durante la guerra, el Estado recapta los molinos y ordena cuánto trigo se muele cada semana. ¿Qué rasgo del sistema planificado se está usando?",
-          "options": [
-            "La propiedad estatal de los molinos, que hace que el Estado compre toda la harina del reino.",
-            "La regulación de los precios, que obliga a los molinos a vender la harina al precio fijado.",
-            "El control central de la producción, que fija las cantidades sin depender del precio.",
-            "La adaptación al mercado, que permite al Estado seguir las señales que dan los precios."
-          ],
-          "answer": 2,
-          "subtopic": "Sistema económico planificado",
-          "difficulty": 2,
-          "explanation": "En el sistema planificado el Estado fija las cantidades y las decisiones de producción."
-        },
-        {
-          "id": "3-5",
-          "q": "El plan del Rey reparte la producción entre las panaderías y además permite que los particulares vendan verduras en el mercado. ¿Qué sistema describe ese conjunto?",
-          "options": [
-            "El sistema económico planificado, donde toda la producción del reino depende de la tabla oficial.",
-            "El sistema económico de libre mercado, donde el Estado solo vigila que se cumplan las normas.",
-            "El sistema económico feudal, donde cada señor entrega parte de su cosecha al rey cada año.",
-            "El sistema económico mixto, que combina la planificación del Estado con la actividad de mercado."
-          ],
-          "answer": 3,
-          "subtopic": "Sistema económico mixto",
           "difficulty": 3,
-          "explanation": "El sistema mixto combina la planificación estatal con la actividad privada y de mercado."
+          "subtopic": "Los cuatro factores de producción",
+          "q": "Un taller de setas usa un terreno prestado, dos cocineros, un horno y la idea de una socia que organiza todo. ¿Qué falta o sobra en esa lista?",
+          "explanation": "Todo recurso se clasifica en uno de los cuatro factores: tierra, trabajo, capital y emprendimiento.",
+          "options": [
+            "Falta el capital físico, porque el horno pertenece al factor trabajo de los cocineros.",
+            "Sobra el emprendimiento, porque la organización de la socia forma parte del factor trabajo.",
+            "Están los cuatro factores: tierra, trabajo, capital y emprendimiento, sin faltar ninguno.",
+            "Falta la tierra, porque un terreno prestado no cuenta como recurso natural del taller."
+          ],
+          "answer": 2
         }
       ]
     },
     {
       "id": 4,
       "code": "Mundo 1-4",
-      "name": "El Castillo de la CPP",
-      "enemy": "Piranha Plant",
-      "emoji": "🌿",
-      "subtopic": "Curva de posibilidades de producción: supuestos, características, costo de oportunidad y crecimiento real",
+      "name": "El Salón de las Tres Puertas",
+      "enemy": "Boo",
+      "emoji": "👻",
+      "subtopic": "Las tres preguntas básicas, los sistemas económicos y el flujo circular",
       "questions": [
         {
           "id": "4-1",
-          "q": "En el Castillo, el rey solo puede elegir entre pescar y sembrar, porque la tierra y el agua son limitadas. ¿Qué supuesto de la CPP representa esa restricción?",
-          "options": [
-            "Los recursos son ilimitados y pueden destinarse a todos los usos posibles.",
-            "Los recursos son limitados y admiten más de un uso alternativo posible.",
-            "La tecnología se mantiene constante durante todo el periodo que se analiza.",
-            "El precio del mercado equilibra siempre la oferta con la demanda de pescado."
-          ],
-          "answer": 1,
-          "subtopic": "Supuestos de la curva de posibilidades de producción",
           "difficulty": 1,
-          "explanation": "La CPP supone recursos limitados que pueden destinarse a usos alternativos, por eso obliga a elegir."
+          "subtopic": "Las tres preguntas económicas",
+          "q": "El reino decide fabricar más escudos que espadas y entregar los escudos solo a los soldados. ¿Qué dos preguntas básicas está respondiendo?",
+          "explanation": "Las preguntas básicas son qué producir, cómo producir y para quién producir; cuándo no es una de ellas.",
+          "options": [
+            "Cómo producir y qué producir, porque elige la técnica y también el bien que se fabrica.",
+            "Qué producir y para quién producir, porque elige el bien y define quién lo recibe.",
+            "Para quién producir y cómo producir, porque reparte el bien y define la técnica de trabajo.",
+            "Qué producir y cuándo producir, porque elige el bien y también el momento de fabricarlo."
+          ],
+          "answer": 1
         },
         {
           "id": "4-2",
-          "q": "En el Castillo, la curva muestra que producir más pescado obliga a sembrar menos. ¿Qué explica ese movimiento sobre la misma curva?",
-          "options": [
-            "El costo de oportunidad del pescado, expresado en toneladas de sembradio que se dejan de producir.",
-            "El desplazamiento de la curva, que se mueve hacia la izquierda cuando aumenta la pesca.",
-            "El aumento de las posibilidades de producción, que amplía el conjunto de bienes que el reino alcanza.",
-            "La eficiencia productiva, que mejora cuando los recursos ociosos se ponen a trabajar mejor."
-          ],
-          "answer": 0,
-          "subtopic": "Costo de oportunidad en la curva de posibilidades de producción",
           "difficulty": 2,
-          "explanation": "Meterse sobre la misma curva es cambiar la mezcla de producción; por eso sube el costo de oportunidad del pescado."
+          "subtopic": "Libre mercado y economía planificada",
+          "q": "En un reino las fábricas tienen dueños particulares y el precio decide quién compra; en otro, el Estado es dueño de las fábricas y ordena qué se produce. ¿Qué sistemas son?",
+          "explanation": "En el libre mercado deciden consumidores y productores con propiedad privada; en la planificada decide el gobierno, que posee los factores.",
+          "options": [
+            "El primero es economía planificada y el segundo es libre mercado, por el papel del Estado.",
+            "El primero es libre mercado y el segundo es economía planificada.",
+            "Los dos son economías mixtas, porque en ambos existe producción organizada y mercados.",
+            "El primero es economía mixta y el segundo es libre mercado con algo de intervención."
+          ],
+          "answer": 1
         },
         {
           "id": "4-3",
-          "q": "En el Castillo hay dos pescadores ociosos que podrían trabajar mientras los demás pescan. ¿Qué muestra esa situación en la CPP?",
+          "difficulty": 3,
+          "subtopic": "Economía mixta",
+          "q": "Una estudiante afirma que su país es cien por ciento de libre mercado porque casi todas las empresas son privadas. ¿Qué le responde el curso?",
+          "explanation": "Las economías modernas son mixtas: combinan libre mercado con algunas intervenciones del gobierno.",
           "options": [
-            "Que la curva se desplaza, porque más trabajadores amplían las posibilidades de producción.",
-            "Que el punto de la curva no es eficiente, porque no se usa toda la capacidad instalada.",
-            "Que existen recursos ociosos, es decir, capacidad de producción disponible que no se usa.",
-            "Que el costo de oportunidad del pescado baja, porque hay más manos disponibles para pescar."
+            "Que tiene razón si el Estado no fija ni un solo precio en toda la economía del país.",
+            "Que un país solo es planificado cuando el Estado se vuelve dueño de todas sus empresas.",
+            "Que no existe un país totalmente libre de mercado ni uno totalmente planificado.",
+            "Que las economías mixtas aparecen únicamente en los países más pobres del planeta."
           ],
-          "answer": 2,
-          "subtopic": "Recursos ociosos y eficiencia",
-          "difficulty": 2,
-          "explanation": "Los recursos ociosos muestran que un punto interior de la curva es ineficiente: hay producción sin usar."
+          "answer": 2
         },
         {
           "id": "4-4",
-          "q": "En el Castillo hay minas de oro y campos de maíz. Pasar un trabajador de las minas al maíz hace que cada unidad de oro cueste cinco de maíz, cuando antes costaba tres. ¿Qué cambió?",
-          "options": [
-            "La eficiencia del Castillo mejoró, porque los trabajadores ahora se mueven entre minas y campos.",
-            "Las posibilidades de producción disminuyeron, porque el total de bienes alcanzables se reduce.",
-            "La curva se desplazó hacia adentro, porque la economía perdió capacidad de producir todo tipo de bienes.",
-            "El costo de oportunidad del oro aumentó, porque cada unidad obtenida exige renunciar a más maíz."
-          ],
-          "answer": 3,
-          "subtopic": "Costo de oportunidad creciente",
           "difficulty": 2,
-          "explanation": "Cuando el costo de oportunidad va en aumento, la curva es cóncava: producir más de un bien obliga a renunciar a más del otro."
+          "subtopic": "Filtraciones e inyecciones",
+          "q": "En el flujo circular abierto, una familia ahorra parte de su ingreso y el gobierno construye un puente. ¿Cómo se llama cada movimiento?",
+          "explanation": "Las filtraciones sacan dinero del circuito (ahorro, impuestos, importaciones) y las inyecciones lo meten (inversión, gasto público, exportaciones).",
+          "options": [
+            "El ahorro es una filtración y el gasto del gobierno es una inyección al circuito.",
+            "El ahorro es una inyección al circuito y el gasto del gobierno es una filtración de dinero.",
+            "Los dos son filtraciones, porque en ambos casos el dinero sale del bolsillo de las familias.",
+            "Los dos son inyecciones, porque en ambos casos el dinero vuelve a circular en la economía."
+          ],
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "code": "Mundo 1-5",
+      "name": "El Castillo de la Curva",
+      "enemy": "Piranha Plant",
+      "emoji": "🌿",
+      "subtopic": "Curva de posibilidades de producción: supuestos, eficiencia, costo de oportunidad y crecimiento",
+      "questions": [
+        {
+          "id": "5-1",
+          "difficulty": 2,
+          "subtopic": "Supuestos de la curva de posibilidades de producción",
+          "q": "Un equipo dibuja la curva suponiendo que solo hay dos bienes, que todos trabajan, que los recursos son fijos y que la técnica no cambia. ¿Por qué importa declarar esos supuestos?",
+          "explanation": "La curva se construye con cuatro supuestos: solo dos bienes, empleo total, recursos fijos y tecnología fija.",
+          "options": [
+            "Porque sin esos supuestos la curva se vuelve una recta y no sirve para explicar la escasez.",
+            "Porque los supuestos permiten calcular el precio de cada bien en los mercados del reino.",
+            "Porque el modelo necesita que la técnica mejore cada año para poder desplazarse hacia afuera del gráfico.",
+            "Porque la curva solo es válida bajo esas condiciones y cambia si alguna deja de cumplirse."
+          ],
+          "answer": 3
         },
         {
-          "id": "4-5",
-          "q": "El Castillo descubre una técnica nueva de pesca que multiplica el pescado sin necesitar más pescadores. ¿Qué efecto tiene sobre la CPP?",
+          "id": "5-2",
+          "difficulty": 2,
+          "subtopic": "Eficiencia y puntos de la curva",
+          "q": "El castillo produce en un punto que queda dentro de la curva: hay herreros sin trabajo y trigo que se pierde en los silos. ¿Qué significa ese punto?",
+          "explanation": "Un punto dentro de la curva es ineficiente: hay desempleo o desperdicio de recursos y se puede producir más sin renunciar a nada.",
           "options": [
-            "Mueve el punto sobre la curva, porque los mismos pescadores reparten mejor su tiempo de pesca diaria.",
-            "Aumenta las posibilidades de producción, porque con los mismos recursos se obtiene más pescado.",
-            "Reduce la escasez de recursos, porque el castillo dispone de más tiempo libre para pescar.",
-            "No altera la curva, porque la técnica nueva solo mejora la calidad del pescado capturado."
+            "Que la producción es eficiente, porque el reino está usando todos los recursos que tiene disponibles hoy.",
+            "Que ese punto es inalcanzable con los recursos y la técnica que el castillo tiene hoy.",
+            "Que la curva debe desplazarse hacia adentro, porque el castillo está produciendo muy poco.",
+            "Que la producción es ineficiente y que se podrían obtener más bienes sin sacrificar otros."
           ],
-          "answer": 1,
-          "subtopic": "Crecimiento real y aumento de las posibilidades de producción",
+          "answer": 3
+        },
+        {
+          "id": "5-3",
           "difficulty": 3,
-          "explanation": "El crecimiento real amplía las posibilidades de producción: la curva se desplaza hacia afuera porque hay más bienes alcanzables con los mismos recursos."
+          "subtopic": "Costo de oportunidad creciente y constante",
+          "q": "Dos reinos dibujan su curva: en uno es cóncava y en el otro es una recta. ¿Qué explica esa diferencia?",
+          "explanation": "Si los recursos no son igualmente aptos, el costo de oportunidad crece y la curva es cóncava; si son intercambiables, es recta.",
+          "options": [
+            "En el primero los recursos no son igualmente aptos para ambos bienes; en el segundo sí lo son.",
+            "En el primero la técnica cambia cada año; en el segundo la técnica se mantiene fija en todo el periodo.",
+            "En el primero hay recursos desempleados; en el segundo todos los recursos están ocupados.",
+            "En el primero la curva se desplaza hacia afuera; en el segundo la curva nunca se desplaza."
+          ],
+          "answer": 0
+        },
+        {
+          "id": "5-4",
+          "difficulty": 3,
+          "subtopic": "Crecimiento real y crecimiento potencial",
+          "q": "El rey pone a trabajar a los herreros que estaban ociosos y además compra una técnica nueva de forja. ¿Qué ocurre con la curva en cada caso?",
+          "explanation": "El crecimiento real aprovecha mejor los recursos y va de un punto interior a la curva; el potencial desplaza la curva.",
+          "options": [
+            "El primer cambio desplaza la curva hacia afuera; el segundo lleva la producción a la curva.",
+            "El primer cambio lleva la producción a la curva; el segundo desplaza la curva hacia afuera.",
+            "Los dos cambios desplazan la curva, porque en ambos casos el reino termina produciendo más.",
+            "Ninguno de los dos mueve la curva, porque el empleo y la técnica ya están dentro del modelo."
+          ],
+          "answer": 1
+        },
+        {
+          "id": "5-5",
+          "difficulty": 3,
+          "subtopic": "Desplazamientos de la curva de posibilidades de producción",
+          "q": "Llega el verano y sube el consumo de helado; al mismo tiempo escasea el metal para fabricar autos. ¿En cuál de los dos casos se desplaza la curva?",
+          "explanation": "La demanda no desplaza la curva; la escasez de un recurso sí contrae la producción de ese bien.",
+          "options": [
+            "Solo en el primero: si la demanda aumenta, la curva debe ampliarse para poder responderle.",
+            "En los dos: cualquier cambio en el mercado desplaza la curva hacia un lado distinto del gráfico.",
+            "Solo en el segundo: la demanda no es factor del modelo y el metal sí limita la producción.",
+            "En ninguno: los dos cambios son de demanda y la curva solo cambia por mejoras técnicas."
+          ],
+          "answer": 2
         }
       ]
     }
