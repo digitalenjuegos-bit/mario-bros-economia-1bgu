@@ -775,6 +775,8 @@
     <div class="note">Solo se permite un intento por estudiante. Al terminar, tu nota queda guardada y no puedes volver a jugar.</div>
   </div>
 
+  <div class="note" id="quizClosedBox" hidden>🔒 <strong>La evaluación está cerrada.</strong> Tu docente la abrirá cuando esté listo. Vuelve a cargar esta página más tarde.</div>
+
   <div class="card">
     <label for="studentSelect">Tu nombre</label>
     <select id="studentSelect">
@@ -894,6 +896,7 @@
     </div>
     <div id="teacherPanel" class="teacher-panel" hidden>
       <div class="teacher-controls">
+        <button class="btn btn-sm" id="btnToggleQuiz">Cerrar quiz</button>
         <button class="btn btn-sm btn-gold" id="btnExport">Exportar a Excel</button>
         <button class="btn btn-sm btn-danger" id="btnClearAll">Borrar todas las notas</button>
         <button class="btn btn-sm" id="btnUnlockLocal">Desbloquear en este navegador</button>
@@ -1104,6 +1107,26 @@ function supabaseGetWithRetry(path, attempts){
       .catch(function(err){ if(n < max) return attempt(n+1); throw err; });
   }
   return attempt(1);
+}
+
+/* Estado del quiz (habilitar/deshabilitar desde el panel docente).
+   Tabla quiz_config: sin fila o open=true → abierto; solo open=false → cerrado.
+   Fail-open: si el servidor no responde, el quiz queda abierto. */
+let QUIZ_OPEN = true;
+function isQuizOpen(){
+  return supabaseGet('quiz_config?exam_id=eq.'+EXAM_ID+'&select=open')
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(rows){
+      const open = !(rows && rows.length && rows[0].open === false);
+      QUIZ_OPEN = open;
+      return { known: true, open: open };
+    })
+    .catch(function(){ return { known: false, open: true }; });
+}
+function applyQuizClosedUI(){
+  const box = $('quizClosedBox');
+  if(box) box.hidden = QUIZ_OPEN;
+  $('btnStart').disabled = !QUIZ_OPEN || !$('studentSelect').value;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1600,27 +1623,36 @@ function onStartClick(){
   $('btnStart').disabled = true;
   $('btnStart').textContent = 'Verificando tu intento...';
   const course = selectedCourse();
-  checkExistingAttempt(fullName, course).then(function(res){
-    STATE.starting = false;
-    $('btnStart').textContent = 'Comenzar aventura';
-    if(res.reason === 'sin-conexion-permitido'){
-      showNameError('⚠️ No se pudo verificar el servidor, pero puedes continuar. Tu progreso se guardará localmente.');
-    }
-    if(res.blocked){
-      $('btnStart').disabled = false;
-      if(res.reason === 'sin-conexion'){
-        showNameError('No se pudo verificar si ya realizaste esta evaluación. Revisa tu conexión a internet y vuelve a intentar. Por seguridad, el intento queda cerrado mientras el servidor no responda.');
-        return;
-      }
-      const rec = res.record || {};
-      const nota = Number(rec.grade||0).toFixed(1);
-      const aciertos = rec.score != null ? rec.score : '?';
-      const total = rec.total || TOTAL_QUESTIONS;
-      const fecha = res.timestamp ? new Date(res.timestamp).toLocaleString('es-EC') : 'fecha desconocida';
-      showNameError('Ya completaste esta evaluación. Tu nota fue <strong>'+nota+'</strong> sobre 10 ('+aciertos+' de '+total+' aciertos), registrada el '+fecha+'. Solo se permite un intento por estudiante.');
+  isQuizOpen().then(function(st){
+    if(st.known && !st.open){
+      STATE.starting = false;
+      $('btnStart').textContent = 'Comenzar aventura';
+      applyQuizClosedUI();
+      showNameError('La evaluación está cerrada. Espera a que tu docente la abra y recarga esta página.');
       return;
     }
-    openRulesModal(fullName, course);
+    checkExistingAttempt(fullName, course).then(function(res){
+      STATE.starting = false;
+      $('btnStart').textContent = 'Comenzar aventura';
+      if(res.reason === 'sin-conexion-permitido'){
+        showNameError('⚠️ No se pudo verificar el servidor, pero puedes continuar. Tu progreso se guardará localmente.');
+      }
+      if(res.blocked){
+        $('btnStart').disabled = false;
+        if(res.reason === 'sin-conexion'){
+          showNameError('No se pudo verificar si ya realizaste esta evaluación. Revisa tu conexión a internet y vuelve a intentar. Por seguridad, el intento queda cerrado mientras el servidor no responda.');
+          return;
+        }
+        const rec = res.record || {};
+        const nota = Number(rec.grade||0).toFixed(1);
+        const aciertos = rec.score != null ? rec.score : '?';
+        const total = rec.total || TOTAL_QUESTIONS;
+        const fecha = res.timestamp ? new Date(res.timestamp).toLocaleString('es-EC') : 'fecha desconocida';
+        showNameError('Ya completaste esta evaluación. Tu nota fue <strong>'+nota+'</strong> sobre 10 ('+aciertos+' de '+total+' aciertos), registrada el '+fecha+'. Solo se permite un intento por estudiante.');
+        return;
+      }
+      openRulesModal(fullName, course);
+    });
   });
 }
 
@@ -2030,6 +2062,7 @@ function loadTeacher(){
     wrap.innerHTML = '<p style="color:#B3282D;text-align:center;padding:20px;">Supabase no está configurado. Revisa las credenciales.</p>';
     return;
   }
+  refreshQuizToggle();
   supabaseGetWithRetry('quiz_results?exam_id=eq.'+EXAM_ID+'&select=*&order=timestamp.desc', 2)
     .then(function(rows){
       currentTeacherRows = (rows||[]).filter(isCompletedRow);
@@ -2144,6 +2177,48 @@ function unlockLocal(){
     loadTeacher();
     setTeacherStatus('Desbloqueados '+n+' intento(s) en este navegador. Las notas del servidor quedan intactas.', true);
   });
+}
+
+/* Habilitar/deshabilitar el quiz: la fila quiz_config {exam_id, open} manda.
+   El botón muestra la ACCIÓN que se ejecutará al pulsarlo (no el estado actual). */
+function refreshQuizToggle(){
+  const btn = $('btnToggleQuiz');
+  if(!btn) return;
+  supabaseGet('quiz_config?exam_id=eq.'+EXAM_ID+'&select=open')
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(rows){
+      const open = !(rows && rows.length && rows[0].open === false);
+      btn.textContent = open ? 'Cerrar quiz' : 'Abrir quiz';
+      btn.disabled = false;
+    })
+    .catch(function(){
+      btn.textContent = 'Estado no disponible';
+      btn.disabled = true;
+    });
+}
+function toggleQuizStatus(){
+  const btn = $('btnToggleQuiz');
+  if(!btn || btn.disabled) return;
+  btn.disabled = true;
+  supabaseGet('quiz_config?exam_id=eq.'+EXAM_ID+'&select=open')
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(rows){
+      const isOpen = !(rows && rows.length && rows[0].open === false);
+      const newOpen = !isOpen;
+      return supabaseSend('quiz_config?on_conflict=exam_id', 'POST', { exam_id: EXAM_ID, open: newOpen }, 'resolution=merge-duplicates')
+        .then(function(r2){ if(!r2.ok) throw new Error('HTTP '+r2.status); return newOpen; });
+    })
+    .then(function(newOpen){
+      btn.textContent = newOpen ? 'Cerrar quiz' : 'Abrir quiz';
+      btn.disabled = false;
+      setTeacherStatus(newOpen
+        ? 'Quiz abierto: los estudiantes pueden comenzar nuevas partidas.'
+        : 'Quiz cerrado: nadie puede comenzar nuevas partidas. Las notas ya guardadas quedan intactas.', true);
+    })
+    .catch(function(err){
+      btn.disabled = false;
+      setTeacherStatus('No se pudo cambiar el estado del quiz ('+(err && err.message ? err.message : 'error')+'). Verifica la conexión.', false);
+    });
 }
 function clearAllGrades(){
   const btn = $('btnClearAll');
@@ -2388,7 +2463,12 @@ $('studentSelect').addEventListener('change', function(){
   } else {
     box.hidden = true;
   }
-  $('btnStart').disabled = !this.value;
+  $('btnStart').disabled = !this.value || !QUIZ_OPEN;
+  /* Si al cargar apareció cerrado, re-verificar al elegir nombre: el docente
+     puede abrirlo mientras la página está abierta y así la UI se recupera sola. */
+  if(this.value && !QUIZ_OPEN){
+    isQuizOpen().then(function(st){ if(st.known && st.open) applyQuizClosedUI(); });
+  }
 });
 $('btnStart').addEventListener('click', onStartClick);
 // btnEnterWorld, btnNextWorld, btnSeeGrade removed (screens no longer exist)
@@ -2412,6 +2492,7 @@ $('teacherKeyInput').addEventListener('keydown', function(e){ if(e.key === 'Ente
 $('btnExport').addEventListener('click', exportExcel);
 $('btnClearAll').addEventListener('click', clearAllGrades);
 $('btnUnlockLocal').addEventListener('click', unlockLocal);
+$('btnToggleQuiz').addEventListener('click', toggleQuizStatus);
 $('modal-teacher').addEventListener('click', function(e){ if(e.target === this) closeTeacherModal(); });
 $('modal-rules').addEventListener('click', function(e){ if(e.target === this) closeRulesModal(); });
 $('btnRanking').addEventListener('click', openRanking);
@@ -2434,6 +2515,7 @@ $('modal-report').addEventListener('click', function(e){ if(e.target === this) c
   $('appUnit').textContent = BANK.unit || 'Cinco mundos, cinco peleas, una sola nota';
   $('btnStart').disabled = true;
   renderHud();
+  isQuizOpen().then(function(st){ if(st.known && !st.open) applyQuizClosedUI(); });
 })();
 </script>
 </body>
