@@ -896,8 +896,10 @@
       <div class="teacher-controls">
         <button class="btn btn-sm btn-gold" id="btnExport">Exportar a Excel</button>
         <button class="btn btn-sm btn-danger" id="btnClearAll">Borrar todas las notas</button>
+        <button class="btn btn-sm" id="btnUnlockLocal">Desbloquear en este navegador</button>
         <span id="teacherCount" style="align-self:center;color:#4A5C7C;font-size:.9rem;"></span>
       </div>
+      <div id="teacherStatus" style="display:none;margin:2px 0 10px;font-size:.85rem;line-height:1.4;"></div>
       <div class="table-wrap" id="teacherTableWrap"></div>
     </div>
   </div>
@@ -1484,6 +1486,32 @@ function saveLocalRecord(rec){
   all[normalizeName(rec.full)] = rec;
   try{ localStorage.setItem(LS_KEY, JSON.stringify(all)); }catch(e){}
 }
+function deleteLocalKey(key){
+  const all = getLocalAll();
+  if(!key || !(key in all)) return false;
+  delete all[key];
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(all)); }catch(e){}
+  return true;
+}
+/* La clave local se guardó con el orden exacto del nombre elegido en la nómina.
+   Probamos los tres órdenes posibles para localizarla. */
+function localKeyFor(name, last){
+  const all = getLocalAll();
+  const cands = [(name||'')+' '+(last||''), (last||'')+' '+(name||''), (last||'')+', '+(name||'')];
+  for(let i=0;i<cands.length;i++){
+    const k = normalizeName(cands[i]);
+    if(k && all[k]) return k;
+  }
+  return '';
+}
+function deleteLocalStudent(name, last){
+  return deleteLocalKey(localKeyFor(name, last));
+}
+function clearAllLocalRecords(){
+  const n = Object.keys(getLocalAll()).length;
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  return n;
+}
 function saveProgress(){
   if(!STATE.studentFullName) return;
   saveLocalRecord({
@@ -2026,10 +2054,11 @@ function renderTeacherTable(rows){
   rows.forEach(function(r,idx){
     const name = r.student_name||'';
     const last = r.student_lastname||'';
+    const hasLocal = !!localKeyFor(name, last);
     const date = r.timestamp||r.created_at||'';
     const dateStr = date ? new Date(date).toLocaleString('es-EC') : '-';
     html += '<tr>'+
-      '<td>'+escapeHtml(name)+'</td>'+
+      '<td>'+escapeHtml(name)+(hasLocal ? ' <span style="font-size:.68rem;color:#4A5C7C;font-weight:600;" title="Este navegador guarda un intento de este estudiante">local</span>' : '')+'</td>'+
       '<td>'+escapeHtml(last)+'</td>'+
       '<td>'+escapeHtml(r.course||'1BGU')+'</td>'+
       '<td>'+(r.score||0)+'</td>'+
@@ -2049,9 +2078,19 @@ function renderTeacherTable(rows){
       const row = currentTeacherRows[idx];
       if(!row || !row.id) return;
       armButton(this, function(){
+        const full = ((row.student_name||'')+' '+(row.student_lastname||'')).trim();
         supabaseSend('quiz_results?id=eq.'+row.id, 'DELETE')
-          .then(function(){ loadTeacher(); })
-          .catch(function(){ loadTeacher(); });
+          .then(function(){
+            const cleared = deleteLocalStudent(row.student_name, row.student_lastname);
+            loadTeacher();
+            setTeacherStatus(cleared
+              ? 'Registro de '+full+' eliminado del servidor y desbloqueado en este navegador.'
+              : 'Registro de '+full+' eliminado del servidor. En este navegador no había intento guardado: el bloqueo vive en el equipo donde se jugó, y allí hay que pulsar «Desbloquear en este navegador».', true);
+          })
+          .catch(function(){
+            loadTeacher();
+            setTeacherStatus('No se pudo eliminar el registro de '+full+'. Revisa la conexión.', false);
+          });
       });
     });
   });
@@ -2067,25 +2106,58 @@ function renderTeacherTable(rows){
 function armButton(btn, fn){
   if(btn.dataset.armed === '1'){
     btn.dataset.armed = '0';
-    btn.textContent = 'Eliminar';
+    btn.textContent = btn.dataset.label || 'Eliminar';
     fn();
     return;
   }
+  btn.dataset.label = btn.textContent;
   btn.dataset.armed = '1';
   btn.textContent = '¿Confirmar?';
   setTimeout(function(){
     if(btn.dataset.armed === '1'){
       btn.dataset.armed = '0';
-      btn.textContent = 'Eliminar';
+      btn.textContent = btn.dataset.label || 'Eliminar';
     }
   }, 3000);
+}
+function setTeacherStatus(msg, ok){
+  const el = $('teacherStatus');
+  if(!el) return;
+  if(!msg){ el.style.display='none'; el.textContent=''; return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.color = ok === false ? '#B3282D' : '#1E6F50';
+}
+/* El bloqueo de un intento vive en dos lugares: la fila del servidor y el
+   registro de localStorage del navegador donde se jugó. El panel solo puede
+   limpiar el segundo cuando se abre en ese mismo navegador; por eso el botón
+   existe aparte y avisa con claridad qué alcanzó a limpiar. */
+function unlockLocal(){
+  const btn = $('btnUnlockLocal');
+  const pending = Object.keys(getLocalAll()).length;
+  if(!pending){
+    setTeacherStatus('Este navegador no guarda ningún intento. Las notas del servidor no cambian.', true);
+    return;
+  }
+  armButton(btn, function(){
+    const n = clearAllLocalRecords();
+    loadTeacher();
+    setTeacherStatus('Desbloqueados '+n+' intento(s) en este navegador. Las notas del servidor quedan intactas.', true);
+  });
 }
 function clearAllGrades(){
   const btn = $('btnClearAll');
   armButton(btn, function(){
     supabaseSend('quiz_results?exam_id=eq.'+EXAM_ID, 'DELETE')
-      .then(function(){ loadTeacher(); })
-      .catch(function(){ loadTeacher(); });
+      .then(function(){
+        const n = clearAllLocalRecords();
+        loadTeacher();
+        setTeacherStatus('Se borraron todas las notas de este examen. Intentos desbloqueados en este navegador: '+n+'.', true);
+      })
+      .catch(function(){
+        loadTeacher();
+        setTeacherStatus('No se pudieron borrar todas las notas. Revisa la conexión.', false);
+      });
   });
 }
 function exportExcel(){
@@ -2339,6 +2411,7 @@ $('btnValidateKey').addEventListener('click', validateTeacherKey);
 $('teacherKeyInput').addEventListener('keydown', function(e){ if(e.key === 'Enter') validateTeacherKey(); });
 $('btnExport').addEventListener('click', exportExcel);
 $('btnClearAll').addEventListener('click', clearAllGrades);
+$('btnUnlockLocal').addEventListener('click', unlockLocal);
 $('modal-teacher').addEventListener('click', function(e){ if(e.target === this) closeTeacherModal(); });
 $('modal-rules').addEventListener('click', function(e){ if(e.target === this) closeRulesModal(); });
 $('btnRanking').addEventListener('click', openRanking);
