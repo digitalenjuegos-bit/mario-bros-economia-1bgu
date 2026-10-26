@@ -31,12 +31,12 @@
           "id": "1-2",
           "difficulty": 2,
           "subtopic": "Nueve conceptos clave",
-          "q": "El alcalde quiere que la aldea produzca más sin agotar el bosque y sin dejar a los vecinos fuera del reparto. ¿Qué dos conceptos clave está tratando de equilibrar?",
+          "q": "El alcalde de la aldea quiere que la producción crezca este año, pero teme que la tala excesiva deje el bosque sin árboles y que la ganancia quede concentrada en tres familias. ¿Qué dos conceptos clave del curso está tratando de equilibrar?",
           "explanation": "La sostenibilidad busca usar los recursos sin agotarlos y la equidad busca repartir lo producido con justicia.",
           "options": [
-            "Sostenibilidad y equidad: usar los recursos sin agotarlos y repartir lo producido con justicia.",
+            "Sostenibilidad y equidad: sostener la producción a lo largo del tiempo y repartir el resultado entre todos.",
             "Eficiencia e intervención: producir sin desperdiciar nada y dejar que el Estado fije cada precio.",
-            "Cambio e interdependencia: aceptar que la aldea se transforma con el tiempo y que los vecinos se necesitan.",
+            "Cambio e interdependencia: aceptar que la aldea se transforma con el tiempo y que los vecinos se necesitan unos a otros para producir.",
             "Escasez y bienestar económico: reconocer que faltan recursos y que todos los vecinos desean más."
           ],
           "answer": 0
@@ -72,8 +72,8 @@
           "q": "En el bosque sobran setas comunes, pero todos quieren la seta dorada y esta temporada solo crecieron tres. ¿Qué muestra ese caso?",
           "explanation": "La escasez aparece porque los deseos son ilimitados y los recursos para satisfacerlos son limitados.",
           "options": [
-            "Que la escasez desaparece cuando un bien se puede conseguir sin pagar nada por él en el bosque.",
-            "Que la escasez nace de la relación entre deseos ilimitados y recursos limitados.",
+            "Que la escasez desaparece cuando un bien se puede conseguir sin pagar nada por él en cualquier lugar del bosque.",
+            "Que la escasez nace de la relación entre deseos ilimitados y recursos limitados, sin importar el precio.",
             "Que la abundancia de un solo bien impide que los demás bienes del bosque se vuelvan escasos.",
             "Que la escasez de un bien depende del precio que el mercado fije para ese bien disponible."
           ],
@@ -86,10 +86,10 @@
           "q": "Koopa tiene libre la tarde del sábado: puede entrenar en el castillo o ayudar en la tienda de Toad. Decide entrenar. ¿Cuál fue su costo de oportunidad?",
           "explanation": "El costo de oportunidad es la siguiente mejor alternativa a la que se renuncia al tomar una decisión.",
           "options": [
-            "El cansancio que le dejó el entrenamiento, porque es el precio físico de haber elegido.",
+            "El cansancio físico que le dejó el entrenamiento, porque es el precio corporal de haber elegido esa opción.",
             "El tiempo completo de la tarde, porque lo gastó entero en una sola actividad del sábado.",
             "Lo que habría ganado si además hubiera entrenado el domingo por la mañana temprano.",
-            "La ayuda que dejó de dar en la tienda, porque era su siguiente mejor alternativa."
+            "La ayuda que dejó de dar en la tienda de Toad, porque era su siguiente mejor alternativa disponible."
           ],
           "answer": 3
         },
@@ -101,7 +101,7 @@
           "explanation": "El análisis marginal compara los beneficios y los costos de una unidad adicional, no el total acumulado.",
           "options": [
             "Compara el total de piezas de las nueve horas con el total de las ocho horas ya trabajadas.",
-            "Compara lo que produce esa hora extra con lo que le cuesta quedarse una hora más.",
+            "Compara lo que produce esa hora extra con el costo de quedarse una hora más en el taller.",
             "Repite la misma jornada de ocho horas, porque fue la que dio el mejor resultado medido.",
             "Suma el costo de todas las horas del día y lo divide entre el total de piezas producidas."
           ],
@@ -152,8 +152,8 @@
           "q": "El rey compra un horno nuevo y además paga un curso para que el panadero aprenda a usarlo. ¿Cuál afirmación es correcta?",
           "explanation": "El capital físico es un recurso creado por humanos para producir otros bienes; el capital humano son habilidades o conocimientos adquiridos.",
           "options": [
-            "El horno es capital físico y el curso forma capital humano en el panadero.",
-            "Los dos son capital físico, porque ambos aumentan la producción diaria de la panadería.",
+            "El horno es capital físico y el curso forma capital humano, porque cambia lo que sabe el panadero.",
+            "Los dos son capital físico, porque tanto el horno como el curso aumentan la producción diaria de la panadería.",
             "Los dos son capital humano, porque dependen del conocimiento que tiene una persona.",
             "El horno es capital humano y el curso es capital físico, porque el curso se compra."
           ],
@@ -166,10 +166,10 @@
           "q": "Toad reúne el ahorro de tres vecinos, alquila un terreno, contrata dos panaderos y abre una panadería. ¿Qué factor de producción representa su papel?",
           "explanation": "El emprendimiento son los líderes que reúnen los otros factores para producir bienes y servicios.",
           "options": [
-            "Trabajo, porque dedica su esfuerzo diario a que la panadería del reino funcione bien.",
+            "Trabajo, porque dedica su esfuerzo diario a que la panadería del reino funcione y produzca cada mañana.",
             "Capital humano, porque los conocimientos que adquirió le permiten organizar todo.",
             "Tierra, porque el negocio depende del terreno que decidió alquilar para abrirlo.",
-            "Emprendimiento, porque reúne los demás factores y asume el riesgo de la idea."
+            "Emprendimiento, porque junta los demás factores y asume el riesgo de que la idea falle."
           ],
           "answer": 3
         },
@@ -205,8 +205,8 @@
           "explanation": "Las preguntas básicas son qué producir, cómo producir y para quién producir; cuándo no es una de ellas.",
           "options": [
             "Cómo producir y qué producir, porque elige la técnica y también el bien que se fabrica.",
-            "Qué producir y para quién producir, porque elige el bien y define quién lo recibe.",
-            "Para quién producir y cómo producir, porque reparte el bien y define la técnica de trabajo.",
+            "Qué producir y para quién producir, porque elige el bien y define quién lo recibe al final.",
+            "Para quién producir y cómo producir, porque reparte el bien entre la gente y define la técnica de trabajo.",
             "Qué producir y cuándo producir, porque elige el bien y también el momento de fabricarlo."
           ],
           "answer": 1
@@ -218,8 +218,8 @@
           "q": "En un reino las fábricas tienen dueños particulares y el precio decide quién compra; en otro, el Estado es dueño de las fábricas y ordena qué se produce. ¿Qué sistemas son?",
           "explanation": "En el libre mercado deciden consumidores y productores con propiedad privada; en la planificada decide el gobierno, que posee los factores.",
           "options": [
-            "El primero es economía planificada y el segundo es libre mercado, por el papel del Estado.",
-            "El primero es libre mercado y el segundo es economía planificada.",
+            "El primero es economía planificada y el segundo es libre mercado, por el papel que cumple el Estado en cada reino.",
+            "El primero es libre mercado y el segundo es economía planificada, por quién es dueño de las fábricas.",
             "Los dos son economías mixtas, porque en ambos existe producción organizada y mercados.",
             "El primero es economía mixta y el segundo es libre mercado con algo de intervención."
           ],
@@ -233,8 +233,8 @@
           "explanation": "Las economías modernas son mixtas: combinan libre mercado con algunas intervenciones del gobierno.",
           "options": [
             "Que tiene razón si el Estado no fija ni un solo precio en toda la economía del país.",
-            "Que un país solo es planificado cuando el Estado se vuelve dueño de todas sus empresas.",
-            "Que no existe un país totalmente libre de mercado ni uno totalmente planificado.",
+            "Que un país solo es planificado cuando el Estado se vuelve dueño de todas sus empresas y de toda la tierra.",
+            "Que no existe un país totalmente libre de mercado ni otro totalmente planificado en la práctica.",
             "Que las economías mixtas aparecen únicamente en los países más pobres del planeta."
           ],
           "answer": 2
@@ -246,9 +246,9 @@
           "q": "En el flujo circular abierto, una familia ahorra parte de su ingreso y el gobierno construye un puente. ¿Cómo se llama cada movimiento?",
           "explanation": "Las filtraciones sacan dinero del circuito (ahorro, impuestos, importaciones) y las inyecciones lo meten (inversión, gasto público, exportaciones).",
           "options": [
-            "El ahorro es una filtración y el gasto del gobierno es una inyección al circuito.",
+            "El ahorro es una filtración y el gasto del gobierno es una inyección que devuelve dinero al circuito.",
             "El ahorro es una inyección al circuito y el gasto del gobierno es una filtración de dinero.",
-            "Los dos son filtraciones, porque en ambos casos el dinero sale del bolsillo de las familias.",
+            "Los dos son filtraciones, porque en ambos casos el dinero sale del bolsillo de las familias y no regresa.",
             "Los dos son inyecciones, porque en ambos casos el dinero vuelve a circular en la economía."
           ],
           "answer": 0
@@ -312,8 +312,8 @@
           "q": "El rey pone a trabajar a los herreros que estaban ociosos y además compra una técnica nueva de forja. ¿Qué ocurre con la curva en cada caso?",
           "explanation": "El crecimiento real aprovecha mejor los recursos y va de un punto interior a la curva; el potencial desplaza la curva.",
           "options": [
-            "El primer cambio desplaza la curva hacia afuera; el segundo lleva la producción a la curva.",
-            "El primer cambio lleva la producción a la curva; el segundo desplaza la curva hacia afuera.",
+            "El primer cambio desplaza la curva; el segundo lleva la producción a la curva.",
+            "El primer cambio lleva la producción a la curva; el segundo desplaza la curva hacia fuera.",
             "Los dos cambios desplazan la curva, porque en ambos casos el reino termina produciendo más.",
             "Ninguno de los dos mueve la curva, porque el empleo y la técnica ya están dentro del modelo."
           ],
