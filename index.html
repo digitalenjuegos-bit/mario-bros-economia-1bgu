@@ -902,6 +902,7 @@
         <button class="btn btn-sm" id="btnUnlockLocal">Desbloquear en este navegador</button>
         <span id="teacherCount" style="align-self:center;color:#4A5C7C;font-size:.9rem;"></span>
       </div>
+      <div class="teacher-ayuda" style="font-size:.8rem;color:#4A5C7C;margin:4px 0 8px;">«Eliminar intento» borra la nota del servidor y desbloquea al estudiante en cualquier equipo (debe recargar la página). «Desbloquear en este navegador» solo limpia los intentos guardados en este equipo.</div>
       <div id="teacherStatus" style="display:none;margin:2px 0 10px;font-size:.85rem;line-height:1.4;"></div>
       <div class="table-wrap" id="teacherTableWrap"></div>
     </div>
@@ -1530,6 +1531,30 @@ function localKeyFor(name, last){
 function deleteLocalStudent(name, last){
   return deleteLocalKey(localKeyFor(name, last));
 }
+/* Borra el registro local COMPLETADO de un estudiante cuando el servidor ya no
+   tiene su fila (por ejemplo, el docente eliminó la nota). Acepta variantes de
+   orden del nombre: compara los tokens normalizados, sin importar el orden.
+   Nunca toca avances a medias (completed:false) ni los de otros estudiantes.
+   Devuelve la cantidad de registros borrados. */
+function purgeLocalCompletedRecord(fullName){
+  const target = normalizeName(fullName).split(' ').filter(Boolean).sort().join(' ');
+  if(!target) return 0;
+  const all = getLocalAll();
+  let removed = 0;
+  Object.keys(all).forEach(function(key){
+    const rec = all[key];
+    if(!rec || rec.completed !== true) return;
+    const recTokens = normalizeName(rec.full || key).split(' ').filter(Boolean).sort().join(' ');
+    if(key === normalizeName(fullName) || recTokens === target){
+      delete all[key];
+      removed++;
+    }
+  });
+  if(removed){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(all)); }catch(e){}
+  }
+  return removed;
+}
 function clearAllLocalRecords(){
   const n = Object.keys(getLocalAll()).length;
   try{ localStorage.removeItem(LS_KEY); }catch(e){}
@@ -1585,6 +1610,16 @@ function checkExistingAttempt(fullName, course){
     .then(function(rows){
       const found = (rows||[]).filter(isCompletedRow).filter(function(r){ return recordMatches(r, norm, course); })[0];
       if(found) return { blocked:true, reason:'servidor', record:found };
+      /* El servidor es la fuente de verdad. Si responde con éxito y no hay fila
+         completada para este estudiante, el registro local completado quedó
+         obsoleto (caso típico: el docente eliminó la nota desde su panel) y hay
+         que borrarlo para permitir un nuevo intento. Los avances a medias
+         (completed:false) se conservan para poder continuar la partida. */
+      if(local && local.completed){
+        deleteLocalKey(normalizeName(fullName));
+        if(local.full) deleteLocalKey(normalizeName(local.full));
+        purgeLocalCompletedRecord(fullName);
+      }
       return { blocked:false, reason:'ok' };
     })
     .catch(function(err){
@@ -1648,7 +1683,11 @@ function onStartClick(){
         const aciertos = rec.score != null ? rec.score : '?';
         const total = rec.total || TOTAL_QUESTIONS;
         const fecha = res.timestamp ? new Date(res.timestamp).toLocaleString('es-EC') : 'fecha desconocida';
-        showNameError('Ya completaste esta evaluación. Tu nota fue <strong>'+nota+'</strong> sobre 10 ('+aciertos+' de '+total+' aciertos), registrada el '+fecha+'. Solo se permite un intento por estudiante.');
+        let msg = 'Ya completaste esta evaluación. Tu nota fue <strong>'+nota+'</strong> sobre 10 ('+aciertos+' de '+total+' aciertos), registrada el '+fecha+'. Solo se permite un intento por estudiante.';
+        if(res.reason === 'local'){
+          msg += ' Si tu docente eliminó tu registro, recarga esta página para volver a intentarlo.';
+        }
+        showNameError(msg);
         return;
       }
       openRulesModal(fullName, course);
@@ -2098,7 +2137,7 @@ function renderTeacherTable(rows){
       '<td>'+(r.total||0)+'</td>'+
       '<td><strong>'+Number(r.grade||0).toFixed(1)+'</strong></td>'+
       '<td>'+dateStr+'</td>'+
-      '<td style="white-space:nowrap;"><button class="btn btn-sm" data-rep="'+idx+'">📋 Informe</button> <button class="btn btn-sm btn-danger" data-del="'+idx+'">Eliminar</button></td>'+
+      '<td style="white-space:nowrap;"><button class="btn btn-sm" data-rep="'+idx+'">📋 Informe</button> <button class="btn btn-sm btn-danger" data-del="'+idx+'" title="Borra el registro del servidor y permite al estudiante volver a hacer el quiz">Eliminar intento</button></td>'+
       '</tr>';
   });
   html += '</tbody></table>';
@@ -2114,11 +2153,19 @@ function renderTeacherTable(rows){
         const full = ((row.student_name||'')+' '+(row.student_lastname||'')).trim();
         supabaseSend('quiz_results?id=eq.'+row.id, 'DELETE')
           .then(function(){
+            return supabaseGet('quiz_results?id=eq.'+row.id+'&select=id');
+          })
+          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+          .then(function(rows){
+            if((rows||[]).length > 0){
+              loadTeacher();
+              setTeacherStatus('El servidor no eliminó el registro de '+full+'. Revisa la conexión e inténtalo de nuevo.', false);
+              return;
+            }
             const cleared = deleteLocalStudent(row.student_name, row.student_lastname);
             loadTeacher();
-            setTeacherStatus(cleared
-              ? 'Registro de '+full+' eliminado del servidor y desbloqueado en este navegador.'
-              : 'Registro de '+full+' eliminado del servidor. En este navegador no había intento guardado: el bloqueo vive en el equipo donde se jugó, y allí hay que pulsar «Desbloquear en este navegador».', true);
+            const base = 'Registro de '+full+' eliminado. El estudiante ya puede volver a hacer el quiz desde su equipo: pídele recargar la página.';
+            setTeacherStatus(cleared ? base+' Además se limpió el intento guardado en este navegador.' : base, true);
           })
           .catch(function(){
             loadTeacher();
